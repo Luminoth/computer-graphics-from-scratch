@@ -6,7 +6,7 @@ fn main() -> anyhow::Result<()> {
     // create the window
     let video_subsystem = sdl_context.video().unwrap();
     let window = video_subsystem
-        .window("CGFS misc demo", 1024, 768)
+        .window("SDL2 demo", 1024, 768)
         .position_centered()
         .build()
         .unwrap();
