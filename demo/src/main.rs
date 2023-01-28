@@ -1,41 +1,50 @@
-use sdl2::{event::Event, keyboard::Keycode, pixels::Color};
+use sdl2::{event::Event, keyboard::Keycode, pixels::Color, EventPump};
+
+use common::Canvas;
+
+fn handle_events(event_pump: &mut EventPump) -> bool {
+    for event in event_pump.poll_iter() {
+        match event {
+            Event::Quit { .. }
+            | Event::KeyDown {
+                keycode: Some(Keycode::Escape),
+                ..
+            } => return false,
+            _ => {}
+        }
+    }
+
+    true
+}
 
 fn main() -> anyhow::Result<()> {
-    let sdl_context = sdl2::init().unwrap();
+    let sdl_context = sdl2::init().map_err(anyhow::Error::msg)?;
+    let video_subsystem = sdl_context.video().map_err(anyhow::Error::msg)?;
 
-    // create the window
-    let video_subsystem = sdl_context.video().unwrap();
+    // create the window (1080p)
     let window = video_subsystem
-        .window("SDL2 demo", 1024, 768)
+        .window("SDL2 demo", 1920, 1080)
         .position_centered()
         .build()
-        .unwrap();
+        .map_err(anyhow::Error::msg)?;
 
-    let mut canvas = window.into_canvas().build().unwrap();
+    // create the canvas
+    let canvas = Canvas::from_window(window)?;
 
     // start with yellow
-    canvas.set_draw_color(Color::RGB(0, 255, 255));
-    canvas.clear();
+    canvas.clear(Color::RGB(0, 255, 255));
     canvas.present();
 
-    let mut event_pump = sdl_context.event_pump().unwrap();
+    let mut event_pump = sdl_context.event_pump().map_err(anyhow::Error::msg)?;
     let mut i = 0;
     'running: loop {
         // render the next color
         i = (i + 1) % 255;
-        canvas.set_draw_color(Color::RGB(i, 64, 255 - i));
-        canvas.clear();
+        canvas.clear(Color::RGB(i, 64, 255 - i));
 
         // pump the event loop
-        for event in event_pump.poll_iter() {
-            match event {
-                Event::Quit { .. }
-                | Event::KeyDown {
-                    keycode: Some(Keycode::Escape),
-                    ..
-                } => break 'running,
-                _ => {}
-            }
+        if !handle_events(&mut event_pump) {
+            break 'running;
         }
 
         // present the frame
