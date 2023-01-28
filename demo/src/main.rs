@@ -1,4 +1,4 @@
-use sdl2::{event::Event, keyboard::Keycode, pixels::Color, EventPump};
+use sdl2::{event::Event, keyboard::Keycode, pixels::Color, rect::Point, EventPump, Sdl};
 
 use common::Canvas;
 
@@ -17,7 +17,30 @@ fn handle_events(event_pump: &mut EventPump) -> bool {
     true
 }
 
+fn run(sdl_context: Sdl, canvas: Canvas) -> anyhow::Result<()> {
+    let mut event_pump = sdl_context.event_pump().map_err(anyhow::Error::msg)?;
+    'running: loop {
+        canvas.clear(Color::BLACK);
+
+        // pump the event loop
+        if !handle_events(&mut event_pump) {
+            break 'running;
+        }
+
+        canvas.put_pixel(Point::new(0, 0), Color::WHITE)?;
+
+        // present the frame
+        canvas.present();
+
+        // 60 fps-ish
+        std::thread::sleep(std::time::Duration::from_millis(1_000u64 / 60));
+    }
+
+    Ok(())
+}
+
 fn main() -> anyhow::Result<()> {
+    // init SDL
     let sdl_context = sdl2::init().map_err(anyhow::Error::msg)?;
     let video_subsystem = sdl_context.video().map_err(anyhow::Error::msg)?;
 
@@ -31,28 +54,8 @@ fn main() -> anyhow::Result<()> {
     // create the canvas
     let canvas = Canvas::from_window(window)?;
 
-    // start with yellow
-    canvas.clear(Color::RGB(0, 255, 255));
-    canvas.present();
-
-    let mut event_pump = sdl_context.event_pump().map_err(anyhow::Error::msg)?;
-    let mut i = 0;
-    'running: loop {
-        // render the next color
-        i = (i + 1) % 255;
-        canvas.clear(Color::RGB(i, 64, 255 - i));
-
-        // pump the event loop
-        if !handle_events(&mut event_pump) {
-            break 'running;
-        }
-
-        // present the frame
-        canvas.present();
-
-        // 60 fps-ish
-        std::thread::sleep(std::time::Duration::from_millis(1_000u64 / 60));
-    }
+    // run
+    run(sdl_context, canvas)?;
 
     Ok(())
 }
