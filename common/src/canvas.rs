@@ -1,17 +1,14 @@
 use std::cell::RefCell;
 
-use glam::IVec3;
+use glam::{IVec3, Vec3};
 use sdl2::{pixels::Color, rect::Point, render::Canvas as SDLCanvas, video::Window};
 
 pub struct Canvas {
-    width: i32,
     half_width: i32,
-
-    height: i32,
+    width_ratio: f32,
     half_height: i32,
+    height_ratio: f32,
 
-    viewport_width: i32,
-    viewport_height: i32,
     viewport_distance: i32,
 
     canvas: RefCell<SDLCanvas<Window>>,
@@ -19,16 +16,17 @@ pub struct Canvas {
 
 impl Canvas {
     pub fn from_window(window: Window) -> anyhow::Result<Self> {
+        let viewport = IVec3::new(1, 1, 1);
+
         let size = window.size();
         let canvas = window.into_canvas().build().map_err(anyhow::Error::msg)?;
+
         Ok(Self {
-            width: size.0 as i32,
             half_width: size.0 as i32 / 2,
-            height: size.1 as i32,
+            width_ratio: viewport.x as f32 / size.0 as f32,
             half_height: size.1 as i32 / 2,
-            viewport_width: 1,
-            viewport_height: 1,
-            viewport_distance: 1,
+            height_ratio: viewport.y as f32 / size.1 as f32,
+            viewport_distance: viewport.z,
             canvas: RefCell::new(canvas),
         })
     }
@@ -41,11 +39,11 @@ impl Canvas {
         self.half_height
     }
 
-    pub fn to_viewport(&self, x: i32, y: i32) -> IVec3 {
-        IVec3::new(
-            x * (self.viewport_width / self.width),
-            y * (self.viewport_height / self.height),
-            self.viewport_distance,
+    pub fn to_viewport(&self, x: i32, y: i32) -> Vec3 {
+        Vec3::new(
+            x as f32 * self.width_ratio,
+            y as f32 * self.height_ratio,
+            self.viewport_distance as f32,
         )
     }
 

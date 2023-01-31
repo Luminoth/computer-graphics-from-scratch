@@ -1,18 +1,18 @@
-use glam::IVec3;
+use glam::Vec3;
 use sdl2::{pixels::Color, rect::Point};
 
 use common::*;
 
 const SPHERES: &'static [Sphere] = &[
-    Sphere::new(IVec3::new(0, -1, 3), 1, Color::RED),
-    Sphere::new(IVec3::new(2, 0, 4), 1, Color::BLUE),
-    Sphere::new(IVec3::new(-2, 0, 4), 1, Color::GREEN),
+    Sphere::new(Vec3::new(0.0, -1.0, 3.0), 1.0, Color::RED),
+    Sphere::new(Vec3::new(2.0, 0.0, 4.0), 1.0, Color::BLUE),
+    Sphere::new(Vec3::new(-2.0, 0.0, 4.0), 1.0, Color::GREEN),
 ];
 
-const MAX_RAY_LEN: i32 = 10;
+const MAX_RAY_LEN: f32 = 10.0;
 
-fn trace_ray(origin: IVec3, direction: IVec3, t_min: i32, t_max: i32) -> Color {
-    let mut closest_t = i32::MAX;
+fn trace_ray(origin: Vec3, direction: Vec3, t_min: f32, t_max: f32) -> Color {
+    let mut closest_t = f32::MAX;
     let mut closest_sphere = None;
 
     for (idx, sphere) in SPHERES.iter().enumerate() {
@@ -37,11 +37,11 @@ fn trace_ray(origin: IVec3, direction: IVec3, t_min: i32, t_max: i32) -> Color {
 }
 
 fn render(canvas: &Canvas) -> anyhow::Result<()> {
-    let camera_pos = IVec3::default();
+    let camera_pos = Vec3::default();
     for x in -canvas.get_half_width()..=canvas.get_half_width() {
         for y in -canvas.get_half_height()..=canvas.get_half_height() {
             let direction = canvas.to_viewport(x, y);
-            let color = trace_ray(camera_pos, direction, 1, MAX_RAY_LEN);
+            let color = trace_ray(camera_pos, direction, 1.0, MAX_RAY_LEN);
             canvas.put_pixel(Point::new(x, y), color)?;
         }
     }

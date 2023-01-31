@@ -31,7 +31,29 @@ impl App {
         true
     }
 
+    #[allow(dead_code)]
+    fn run_debug(&self) -> anyhow::Result<()> {
+        self.canvas.clear(Color::BLACK);
+        if let Some(render) = self.render {
+            render(&self.canvas)?;
+        }
+        self.canvas.present();
+
+        let mut event_pump = self.sdl_context.event_pump().map_err(anyhow::Error::msg)?;
+        'running: loop {
+            if !self.handle_events(&mut event_pump) {
+                break 'running;
+            }
+
+            std::thread::sleep(std::time::Duration::from_millis(1_000u64 / 60));
+        }
+
+        Ok(())
+    }
+
     pub fn run(&self) -> anyhow::Result<()> {
+        //return self.run_debug();
+
         let mut event_pump = self.sdl_context.event_pump().map_err(anyhow::Error::msg)?;
         'running: loop {
             // clear the canvas

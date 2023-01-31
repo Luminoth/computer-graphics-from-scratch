@@ -1,10 +1,10 @@
-use glam::IVec3;
+use glam::Vec3;
 use sdl2::pixels::Color;
 
 #[derive(Debug)]
 pub struct Sphere {
-    center: IVec3,
-    radius: u32,
+    center: Vec3,
+    radius: f32,
 
     color: Color,
 }
@@ -12,15 +12,15 @@ pub struct Sphere {
 impl Default for Sphere {
     fn default() -> Self {
         Self {
-            center: IVec3::default(),
-            radius: 1,
+            center: Vec3::default(),
+            radius: 1.0,
             color: Color::WHITE,
         }
     }
 }
 
 impl Sphere {
-    pub const fn new(center: IVec3, radius: u32, color: Color) -> Self {
+    pub const fn new(center: Vec3, radius: f32, color: Color) -> Self {
         Self {
             center,
             radius,
@@ -28,11 +28,11 @@ impl Sphere {
         }
     }
 
-    pub fn get_center(&self) -> IVec3 {
+    pub fn get_center(&self) -> Vec3 {
         self.center
     }
 
-    pub fn get_radius(&self) -> u32 {
+    pub fn get_radius(&self) -> f32 {
         self.radius
     }
 
@@ -41,26 +41,26 @@ impl Sphere {
     }
 
     // page 20 - 22
-    pub fn intersect_ray(&self, origin: IVec3, direction: IVec3) -> Option<(i32, i32)> {
-        let r = self.radius as i32;
+    pub fn intersect_ray(&self, origin: Vec3, direction: Vec3) -> Option<(f32, f32)> {
+        let r = self.radius;
         let co = origin - self.center;
 
         let a = direction.dot(direction);
-        let b = 2 * co.dot(direction);
+        let b = 2.0 * co.dot(direction);
         let c = co.dot(co) - r * r;
 
         // solve (t1, t2) = (-b +- sqrt(b^2 - 4ac)) / 2a
 
-        let discriminant = b * b - 4 * a * c;
-        if discriminant < 0 {
+        let discriminant = b * b - 4.0 * a * c;
+        if discriminant < 0.0 {
             // no solution
             return None;
         }
 
-        let ds = (discriminant as f32).sqrt() as i32;
+        let ds = discriminant.sqrt();
 
-        let t1 = (-b + ds) / (2 * a);
-        let t2 = (-b - ds) / (2 * a);
+        let t1 = (-b + ds) / (2.0 * a);
+        let t2 = (-b - ds) / (2.0 * a);
 
         Some((t1, t2))
     }
