@@ -3,7 +3,7 @@ use sdl2::{pixels::Color, rect::Point};
 
 use common::*;
 
-const SPHERES: &'static [Sphere] = &[
+const SPHERES: &[Sphere] = &[
     Sphere::new(Vec3::new(0.0, -1.0, 3.0), 1.0, Color::RED),
     Sphere::new(Vec3::new(2.0, 0.0, 4.0), 1.0, Color::BLUE),
     Sphere::new(Vec3::new(-2.0, 0.0, 4.0), 1.0, Color::GREEN),
@@ -49,7 +49,7 @@ fn render(canvas: &Canvas) -> anyhow::Result<()> {
 
 fn main() -> anyhow::Result<()> {
     let app = App::builder()
-        .window_title("Chapter 1")
+        .window_title("Chapter 2")
         .window_size(1080, 1080)
         .render(render)
         .build()?;
