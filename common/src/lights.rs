@@ -70,6 +70,7 @@ impl PointLight {
         self.position
     }
 
+    #[inline]
     pub fn get_contribution(
         &self,
         point: Vec3,
@@ -105,6 +106,7 @@ impl DirectionalLight {
         self.direction
     }
 
+    #[inline]
     pub fn get_contribution(&self, normal: Vec3, v: Vec3, shininess: Option<f32>) -> f32 {
         let l = self.get_direction();
         diffuse_specular(self.get_intensity(), normal, l, v, shininess)
@@ -128,20 +130,5 @@ impl Light {
 
     pub const fn new_directional(intensity: f32, direction: Vec3) -> Self {
         Self::Directional(DirectionalLight::new(intensity, direction))
-    }
-
-    #[inline]
-    pub fn get_contribution(
-        &self,
-        point: Vec3,
-        normal: Vec3,
-        v: Vec3,
-        shininess: Option<f32>,
-    ) -> f32 {
-        match self {
-            Light::Ambient(light) => light.get_contribution(),
-            Light::Point(light) => light.get_contribution(point, normal, v, shininess),
-            Light::Directional(light) => light.get_contribution(normal, v, shininess),
-        }
     }
 }

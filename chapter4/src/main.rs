@@ -3,7 +3,7 @@ use sdl2::{pixels::Color, rect::Point};
 
 use common::*;
 
-const WINDOW_TITLE: &str = "Chapter 3";
+const WINDOW_TITLE: &str = "Chapter 4";
 
 const SPHERES: &[Sphere] = &[
     Sphere::new(Vec3::new(0.0, -1.0, 3.0), 1.0, Color::RED, Some(500.0)),
@@ -23,20 +23,14 @@ const LIGHTS: &[Light] = &[
     Light::new_directional(0.2, Vec3::new(1.0, 4.0, 4.0)),
 ];
 
-fn compute_lighting(point: Vec3, normal: Vec3, v: Vec3, shininess: Option<f32>) -> f32 {
-    assert!(normal.is_normalized());
+const SHADOW_EPSILON: f32 = 0.001;
 
-    LIGHTS
-        .iter()
-        .map(|light| match light {
-            Light::Ambient(light) => light.get_contribution(),
-            Light::Point(light) => light.get_contribution(point, normal, v, shininess),
-            Light::Directional(light) => light.get_contribution(normal, v, shininess),
-        })
-        .sum()
-}
-
-fn trace_ray(origin: Vec3, direction: Vec3, t_min: f32, t_max: f32) -> Color {
+fn closest_intersection(
+    origin: Vec3,
+    direction: Vec3,
+    t_min: f32,
+    t_max: f32,
+) -> (Option<usize>, f32) {
     let mut closest_t = f32::MAX;
     let mut closest_sphere = None;
 
@@ -54,6 +48,42 @@ fn trace_ray(origin: Vec3, direction: Vec3, t_min: f32, t_max: f32) -> Color {
         }
     }
 
+    (closest_sphere, closest_t)
+}
+
+fn compute_lighting(point: Vec3, normal: Vec3, v: Vec3, shininess: Option<f32>) -> f32 {
+    assert!(normal.is_normalized());
+
+    LIGHTS
+        .iter()
+        .map(|light| match light {
+            Light::Ambient(light) => light.get_contribution(),
+            Light::Point(light) => {
+                let l = light.get_position() - point;
+                let t_max = 1.0;
+                let (shadow_sphere, _) = closest_intersection(point, l, SHADOW_EPSILON, t_max);
+                if shadow_sphere.is_some() {
+                    0.0
+                } else {
+                    light.get_contribution(point, normal, v, shininess)
+                }
+            }
+            Light::Directional(light) => {
+                let l = light.get_direction();
+                let t_max = f32::MAX;
+                let (shadow_sphere, _) = closest_intersection(point, l, SHADOW_EPSILON, t_max);
+                if shadow_sphere.is_some() {
+                    0.0
+                } else {
+                    light.get_contribution(normal, v, shininess)
+                }
+            }
+        })
+        .sum()
+}
+
+fn trace_ray(origin: Vec3, direction: Vec3, t_min: f32, t_max: f32) -> Color {
+    let (closest_sphere, closest_t) = closest_intersection(origin, direction, t_min, t_max);
     if let Some(closest_sphere) = closest_sphere {
         let closest_sphere = &SPHERES[closest_sphere];
 
