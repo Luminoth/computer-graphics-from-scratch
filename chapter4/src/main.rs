@@ -5,15 +5,36 @@ use common::*;
 
 const WINDOW_TITLE: &str = "Chapter 4";
 
+const BACKGROUND_COLOR: Color = Color::BLACK;
+
 const SPHERES: &[Sphere] = &[
-    Sphere::new(Vec3::new(0.0, -1.0, 3.0), 1.0, Color::RED, Some(500.0)),
-    Sphere::new(Vec3::new(2.0, 0.0, 4.0), 1.0, Color::BLUE, Some(500.0)),
-    Sphere::new(Vec3::new(-2.0, 0.0, 4.0), 1.0, Color::GREEN, Some(10.0)),
+    Sphere::new(
+        Vec3::new(0.0, -1.0, 3.0),
+        1.0,
+        Color::RED,
+        Some(500.0),
+        Some(0.2),
+    ),
+    Sphere::new(
+        Vec3::new(2.0, 0.0, 4.0),
+        1.0,
+        Color::BLUE,
+        Some(500.0),
+        Some(0.3),
+    ),
+    Sphere::new(
+        Vec3::new(-2.0, 0.0, 4.0),
+        1.0,
+        Color::GREEN,
+        Some(10.0),
+        Some(0.4),
+    ),
     Sphere::new(
         Vec3::new(0.0, -5001.0, 0.0),
         5000.0,
         Color::YELLOW,
         Some(1000.0),
+        Some(0.5),
     ),
 ];
 
@@ -23,7 +44,9 @@ const LIGHTS: &[Light] = &[
     Light::new_directional(0.2, Vec3::new(1.0, 4.0, 4.0)),
 ];
 
-const SHADOW_EPSILON: f32 = 0.001;
+const SURFACE_EPSILON: f32 = 0.001;
+
+const REFLECT_DEPTH: usize = 3;
 
 fn closest_intersection(
     origin: Vec3,
@@ -61,7 +84,7 @@ fn compute_lighting(point: Vec3, normal: Vec3, v: Vec3, shininess: Option<f32>) 
             Light::Point(light) => {
                 let l = light.get_position() - point;
                 let t_max = 1.0;
-                let (shadow_sphere, _) = closest_intersection(point, l, SHADOW_EPSILON, t_max);
+                let (shadow_sphere, _) = closest_intersection(point, l, SURFACE_EPSILON, t_max);
                 if shadow_sphere.is_some() {
                     0.0
                 } else {
@@ -71,7 +94,7 @@ fn compute_lighting(point: Vec3, normal: Vec3, v: Vec3, shininess: Option<f32>) 
             Light::Directional(light) => {
                 let l = light.get_direction();
                 let t_max = f32::MAX;
-                let (shadow_sphere, _) = closest_intersection(point, l, SHADOW_EPSILON, t_max);
+                let (shadow_sphere, _) = closest_intersection(point, l, SURFACE_EPSILON, t_max);
                 if shadow_sphere.is_some() {
                     0.0
                 } else {
@@ -82,7 +105,7 @@ fn compute_lighting(point: Vec3, normal: Vec3, v: Vec3, shininess: Option<f32>) 
         .sum()
 }
 
-fn trace_ray(origin: Vec3, direction: Vec3, t_min: f32, t_max: f32) -> Color {
+fn trace_ray(origin: Vec3, direction: Vec3, t_min: f32, t_max: f32, depth: usize) -> Color {
     let (closest_sphere, closest_t) = closest_intersection(origin, direction, t_min, t_max);
     if let Some(closest_sphere) = closest_sphere {
         let closest_sphere = &SPHERES[closest_sphere];
@@ -92,13 +115,31 @@ fn trace_ray(origin: Vec3, direction: Vec3, t_min: f32, t_max: f32) -> Color {
         let n = n.normalize_or_zero();
 
         let l = compute_lighting(p, n, -direction, closest_sphere.get_shininess());
-        Color::RGB(
+        let local_color = Color::RGB(
             (closest_sphere.get_color().r as f32 * l) as u8,
             (closest_sphere.get_color().g as f32 * l) as u8,
             (closest_sphere.get_color().b as f32 * l) as u8,
-        )
+        );
+
+        if depth == 0 {
+            return local_color;
+        }
+
+        let r = closest_sphere.get_reflectiveness();
+        if let Some(r) = r {
+            let reflected = reflect_ray(-direction, n);
+            let reflected_color = trace_ray(p, reflected, SURFACE_EPSILON, f32::MAX, depth - 1);
+
+            Color::RGB(
+                (local_color.r as f32 * (1.0 - r) + reflected_color.r as f32 * r) as u8,
+                (local_color.g as f32 * (1.0 - r) + reflected_color.g as f32 * r) as u8,
+                (local_color.b as f32 * (1.0 - r) + reflected_color.b as f32 * r) as u8,
+            )
+        } else {
+            local_color
+        }
     } else {
-        Color::WHITE
+        BACKGROUND_COLOR
     }
 }
 
@@ -107,7 +148,7 @@ fn render(canvas: &Canvas) -> anyhow::Result<()> {
     for x in -canvas.get_half_width()..=canvas.get_half_width() {
         for y in -canvas.get_half_height()..=canvas.get_half_height() {
             let direction = canvas.to_viewport(x, y);
-            let color = trace_ray(camera_pos, direction, 1.0, f32::MAX);
+            let color = trace_ray(camera_pos, direction, 1.0, f32::MAX, REFLECT_DEPTH);
             canvas.put_pixel(Point::new(x, y), color)?;
         }
     }

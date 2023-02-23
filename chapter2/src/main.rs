@@ -5,10 +5,12 @@ use common::*;
 
 const WINDOW_TITLE: &str = "Chapter 2";
 
+const BACKGROUND_COLOR: Color = Color::WHITE;
+
 const SPHERES: &[Sphere] = &[
-    Sphere::new(Vec3::new(0.0, -1.0, 3.0), 1.0, Color::RED, None),
-    Sphere::new(Vec3::new(2.0, 0.0, 4.0), 1.0, Color::BLUE, None),
-    Sphere::new(Vec3::new(-2.0, 0.0, 4.0), 1.0, Color::GREEN, None),
+    Sphere::new(Vec3::new(0.0, -1.0, 3.0), 1.0, Color::RED, None, None),
+    Sphere::new(Vec3::new(2.0, 0.0, 4.0), 1.0, Color::BLUE, None, None),
+    Sphere::new(Vec3::new(-2.0, 0.0, 4.0), 1.0, Color::GREEN, None, None),
 ];
 
 fn trace_ray(origin: Vec3, direction: Vec3, t_min: f32, t_max: f32) -> Color {
@@ -32,7 +34,7 @@ fn trace_ray(origin: Vec3, direction: Vec3, t_min: f32, t_max: f32) -> Color {
     if let Some(closest_sphere) = closest_sphere {
         SPHERES[closest_sphere].get_color()
     } else {
-        Color::WHITE
+        BACKGROUND_COLOR
     }
 }
 

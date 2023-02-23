@@ -1,5 +1,7 @@
 use glam::Vec3;
 
+use crate::math::reflect_ray;
+
 pub struct AmbientLight {
     intensity: f32,
 }
@@ -21,9 +23,8 @@ impl AmbientLight {
 }
 
 fn diffuse_specular(intensity: f32, normal: Vec3, l: Vec3, v: Vec3, shininess: Option<f32>) -> f32 {
-    let d = normal.dot(l);
-
     // diffuse
+    let d = normal.dot(l);
     let diffuse = if d > 0.0 {
         intensity * (d / (normal.length() * l.length()))
     } else {
@@ -32,7 +33,7 @@ fn diffuse_specular(intensity: f32, normal: Vec3, l: Vec3, v: Vec3, shininess: O
 
     // specular
     let specular = if let Some(shininess) = shininess {
-        let r = 2.0 * normal * d - l;
+        let r = reflect_ray(l, normal);
 
         let d = r.dot(v);
         if d > 0.0 {

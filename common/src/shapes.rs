@@ -6,8 +6,10 @@ pub struct Sphere {
     center: Vec3,
     radius: f32,
 
+    // generic shape attributes
     color: Color,
     shininess: Option<f32>,
+    reflectiveness: Option<f32>,
 }
 
 impl Default for Sphere {
@@ -17,17 +19,25 @@ impl Default for Sphere {
             radius: 1.0,
             color: Color::WHITE,
             shininess: None,
+            reflectiveness: None,
         }
     }
 }
 
 impl Sphere {
-    pub const fn new(center: Vec3, radius: f32, color: Color, shininess: Option<f32>) -> Self {
+    pub const fn new(
+        center: Vec3,
+        radius: f32,
+        color: Color,
+        shininess: Option<f32>,
+        reflectiveness: Option<f32>,
+    ) -> Self {
         Self {
             center,
             radius,
             color,
             shininess,
+            reflectiveness,
         }
     }
 
@@ -49,6 +59,11 @@ impl Sphere {
     #[inline]
     pub fn get_shininess(&self) -> Option<f32> {
         self.shininess
+    }
+
+    #[inline]
+    pub fn get_reflectiveness(&self) -> Option<f32> {
+        self.reflectiveness
     }
 
     // page 20 - 22
