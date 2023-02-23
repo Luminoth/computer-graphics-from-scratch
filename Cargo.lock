@@ -31,6 +31,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "chapter3"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "common",
+ "glam",
+ "sdl2",
+]
+
+[[package]]
 name = "common"
 version = "0.1.0"
 dependencies = [

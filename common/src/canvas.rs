@@ -31,10 +31,12 @@ impl Canvas {
         })
     }
 
+    #[inline]
     pub fn get_half_width(&self) -> i32 {
         self.half_width
     }
 
+    #[inline]
     pub fn get_half_height(&self) -> i32 {
         self.half_height
     }

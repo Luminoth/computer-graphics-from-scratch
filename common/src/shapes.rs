@@ -7,6 +7,7 @@ pub struct Sphere {
     radius: f32,
 
     color: Color,
+    shininess: Option<f32>,
 }
 
 impl Default for Sphere {
@@ -15,29 +16,39 @@ impl Default for Sphere {
             center: Vec3::default(),
             radius: 1.0,
             color: Color::WHITE,
+            shininess: None,
         }
     }
 }
 
 impl Sphere {
-    pub const fn new(center: Vec3, radius: f32, color: Color) -> Self {
+    pub const fn new(center: Vec3, radius: f32, color: Color, shininess: Option<f32>) -> Self {
         Self {
             center,
             radius,
             color,
+            shininess,
         }
     }
 
+    #[inline]
     pub fn get_center(&self) -> Vec3 {
         self.center
     }
 
+    #[inline]
     pub fn get_radius(&self) -> f32 {
         self.radius
     }
 
+    #[inline]
     pub fn get_color(&self) -> Color {
         self.color
+    }
+
+    #[inline]
+    pub fn get_shininess(&self) -> Option<f32> {
+        self.shininess
     }
 
     // page 20 - 22

@@ -1,7 +1,9 @@
 mod app;
 mod canvas;
-mod sphere;
+mod lights;
+mod shapes;
 
 pub use app::*;
 pub use canvas::*;
-pub use sphere::*;
+pub use lights::*;
+pub use shapes::*;
