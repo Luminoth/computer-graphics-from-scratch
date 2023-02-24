@@ -7,6 +7,8 @@ const WINDOW_TITLE: &str = "Chapter 3";
 
 const BACKGROUND_COLOR: Color = Color::WHITE;
 
+const INFINITY: f32 = f32::MAX;
+
 const SPHERES: &[Sphere] = &[
     Sphere::new(
         Vec3::new(0.0, -1.0, 3.0),
@@ -58,7 +60,7 @@ fn compute_lighting(point: Vec3, normal: Vec3, v: Vec3, shininess: Option<f32>) 
 }
 
 fn trace_ray(origin: Vec3, direction: Vec3, t_min: f32, t_max: f32) -> Color {
-    let mut closest_t = f32::MAX;
+    let mut closest_t = INFINITY;
     let mut closest_sphere = None;
 
     for (idx, sphere) in SPHERES.iter().enumerate() {
@@ -98,7 +100,7 @@ fn render(canvas: &Canvas) -> anyhow::Result<()> {
     for x in -canvas.get_half_width()..=canvas.get_half_width() {
         for y in -canvas.get_half_height()..=canvas.get_half_height() {
             let direction = canvas.to_viewport(x, y);
-            let color = trace_ray(camera_pos, direction, 1.0, f32::MAX);
+            let color = trace_ray(camera_pos, direction, 1.0, INFINITY);
             canvas.put_pixel(Point::new(x, y), color)?;
         }
     }

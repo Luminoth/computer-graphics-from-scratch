@@ -7,6 +7,8 @@ const WINDOW_TITLE: &str = "Chapter 4";
 
 const BACKGROUND_COLOR: Color = Color::BLACK;
 
+const INFINITY: f32 = f32::MAX;
+
 const SPHERES: &[Sphere] = &[
     Sphere::new(
         Vec3::new(0.0, -1.0, 3.0),
@@ -54,7 +56,7 @@ fn closest_intersection(
     t_min: f32,
     t_max: f32,
 ) -> (Option<usize>, f32) {
-    let mut closest_t = f32::MAX;
+    let mut closest_t = INFINITY;
     let mut closest_sphere = None;
 
     for (idx, sphere) in SPHERES.iter().enumerate() {
@@ -93,7 +95,7 @@ fn compute_lighting(point: Vec3, normal: Vec3, v: Vec3, shininess: Option<f32>) 
             }
             Light::Directional(light) => {
                 let l = light.get_direction();
-                let t_max = f32::MAX;
+                let t_max = INFINITY;
                 let (shadow_sphere, _) = closest_intersection(point, l, SURFACE_EPSILON, t_max);
                 if shadow_sphere.is_some() {
                     0.0
@@ -128,7 +130,7 @@ fn trace_ray(origin: Vec3, direction: Vec3, t_min: f32, t_max: f32, depth: usize
         let r = closest_sphere.get_reflectiveness();
         if let Some(r) = r {
             let reflected = reflect_ray(-direction, n);
-            let reflected_color = trace_ray(p, reflected, SURFACE_EPSILON, f32::MAX, depth - 1);
+            let reflected_color = trace_ray(p, reflected, SURFACE_EPSILON, INFINITY, depth - 1);
 
             Color::RGB(
                 (local_color.r as f32 * (1.0 - r) + reflected_color.r as f32 * r) as u8,
@@ -148,7 +150,7 @@ fn render(canvas: &Canvas) -> anyhow::Result<()> {
     for x in -canvas.get_half_width()..=canvas.get_half_width() {
         for y in -canvas.get_half_height()..=canvas.get_half_height() {
             let direction = canvas.to_viewport(x, y);
-            let color = trace_ray(camera_pos, direction, 1.0, f32::MAX, REFLECT_DEPTH);
+            let color = trace_ray(camera_pos, direction, 1.0, INFINITY, REFLECT_DEPTH);
             canvas.put_pixel(Point::new(x, y), color)?;
         }
     }
