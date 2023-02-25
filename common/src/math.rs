@@ -11,6 +11,31 @@ pub fn reflect_ray(r: Vec3, n: Vec3) -> Vec3 {
     2.0 * n * n.dot(r) - r
 }
 
+/// Checks to see if the given ray intersects a shape
+pub fn does_intersect(
+    origin: Vec3,
+    direction: Vec3,
+    t_min: f32,
+    t_max: f32,
+    shapes: impl AsRef<[Shape]>,
+) -> bool {
+    let shapes = shapes.as_ref();
+
+    shapes.iter().any(|shape| {
+        if let Some((t1, t2)) = shape.intersect_ray(origin, direction) {
+            if (t_min..=t_max).contains(&t1) {
+                return true;
+            }
+
+            if (t_min..=t_max).contains(&t2) {
+                return true;
+            }
+        }
+
+        false
+    })
+}
+
 /// Finds the shape closest to the origin that intersects the ray between t_min / t_max
 pub fn closest_intersection(
     origin: Vec3,
@@ -24,6 +49,7 @@ pub fn closest_intersection(
     let mut closest_t = INFINITY;
     let mut closest_shape_idx = None;
 
+    // TODO: there's probably a better method for this
     shapes.iter().enumerate().for_each(|(idx, shape)| {
         if let Some((t1, t2)) = shape.intersect_ray(origin, direction) {
             if (t_min..=t_max).contains(&t1) && t1 < closest_t {
@@ -56,6 +82,7 @@ pub fn trace_ray_no_lights(
     let mut closest_t = INFINITY;
     let mut closest_shape_idx = None;
 
+    // TODO: there's probably a better method for this
     shapes.iter().enumerate().for_each(|(idx, shape)| {
         if let Some((t1, t2)) = shape.intersect_ray(origin, direction) {
             if (t_min..=t_max).contains(&t1) && t1 < closest_t {

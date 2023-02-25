@@ -162,9 +162,7 @@ pub fn compute_lighting(
             Light::Point(light) => {
                 let l = light.get_position() - point;
                 let t_max = 1.0;
-                let (shadow_shape, _) =
-                    closest_intersection(point, l, SURFACE_EPSILON, t_max, shapes);
-                if shadow_shape.is_some() {
+                if does_intersect(point, l, SURFACE_EPSILON, t_max, shapes) {
                     0.0
                 } else {
                     light.get_contribution(point, normal, light_direction, shininess)
@@ -173,9 +171,7 @@ pub fn compute_lighting(
             Light::Directional(light) => {
                 let l = light.get_direction();
                 let t_max = INFINITY;
-                let (shadow_shape, _) =
-                    closest_intersection(point, l, SURFACE_EPSILON, t_max, shapes);
-                if shadow_shape.is_some() {
+                if does_intersect(point, l, SURFACE_EPSILON, t_max, shapes) {
                     0.0
                 } else {
                     light.get_contribution(normal, light_direction, shininess)
