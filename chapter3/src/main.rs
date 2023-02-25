@@ -35,12 +35,12 @@ const LIGHTS: &[Light] = &[
 ];
 
 fn render(canvas: &Canvas) -> anyhow::Result<()> {
-    let camera_pos = Vec3::default();
+    let camera = Camera::default();
     for x in -canvas.get_half_width()..=canvas.get_half_width() {
         for y in -canvas.get_half_height()..=canvas.get_half_height() {
-            let direction = canvas.to_viewport(x, y);
+            let direction = camera.get_rotation() * canvas.to_viewport(x, y);
             let color = trace_ray(
-                camera_pos,
+                camera.get_position(),
                 direction,
                 1.0,
                 INFINITY,

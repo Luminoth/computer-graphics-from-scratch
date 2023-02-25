@@ -3,7 +3,7 @@ use sdl2::{pixels::Color, rect::Point};
 
 use common::*;
 
-const WINDOW_TITLE: &str = "Chapter 4";
+const WINDOW_TITLE: &str = "Chapter 5";
 
 const SPHERES: &[Shape] = &[
     Shape::new_sphere(
@@ -37,7 +37,7 @@ const LIGHTS: &[Light] = &[
 const REFLECT_DEPTH: usize = 3;
 
 fn render(canvas: &Canvas) -> anyhow::Result<()> {
-    let camera = Camera::default();
+    let camera = Camera::new(Vec3::new(5.0, 5.0, -15.0), Vec3::new(-10.0, 10.0, 0.0));
     for x in -canvas.get_half_width()..=canvas.get_half_width() {
         for y in -canvas.get_half_height()..=canvas.get_half_height() {
             let direction = camera.get_rotation() * canvas.to_viewport(x, y);
