@@ -9,34 +9,26 @@ const BACKGROUND_COLOR: Color = Color::WHITE;
 
 const INFINITY: f32 = f32::MAX;
 
-const SPHERES: &[Sphere] = &[
-    Sphere::new(
+const SPHERES: &[Shape] = &[
+    Shape::new_sphere(
         Vec3::new(0.0, -1.0, 3.0),
         1.0,
-        Color::RED,
-        Some(500.0),
-        None,
+        Material::new(Color::RED, Some(500.0), None),
     ),
-    Sphere::new(
+    Shape::new_sphere(
         Vec3::new(2.0, 0.0, 4.0),
         1.0,
-        Color::BLUE,
-        Some(500.0),
-        None,
+        Material::new(Color::BLUE, Some(500.0), None),
     ),
-    Sphere::new(
+    Shape::new_sphere(
         Vec3::new(-2.0, 0.0, 4.0),
         1.0,
-        Color::GREEN,
-        Some(10.0),
-        None,
+        Material::new(Color::GREEN, Some(10.0), None),
     ),
-    Sphere::new(
+    Shape::new_sphere(
         Vec3::new(0.0, -5001.0, 0.0),
         5000.0,
-        Color::YELLOW,
-        Some(1000.0),
-        None,
+        Material::new(Color::YELLOW, Some(1000.0), None),
     ),
 ];
 
@@ -84,11 +76,14 @@ fn trace_ray(origin: Vec3, direction: Vec3, t_min: f32, t_max: f32) -> Color {
         let n = p - closest_sphere.get_center();
         let n = n.normalize_or_zero();
 
-        let l = compute_lighting(p, n, -direction, closest_sphere.get_shininess());
+        let material = closest_sphere.get_material();
+        let l = compute_lighting(p, n, -direction, material.get_shininess());
+
+        let color = material.get_color();
         Color::RGB(
-            (closest_sphere.get_color().r as f32 * l) as u8,
-            (closest_sphere.get_color().g as f32 * l) as u8,
-            (closest_sphere.get_color().b as f32 * l) as u8,
+            (color.r as f32 * l) as u8,
+            (color.g as f32 * l) as u8,
+            (color.b as f32 * l) as u8,
         )
     } else {
         BACKGROUND_COLOR

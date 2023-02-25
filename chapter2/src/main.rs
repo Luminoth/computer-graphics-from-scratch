@@ -9,10 +9,22 @@ const BACKGROUND_COLOR: Color = Color::WHITE;
 
 const INFINITY: f32 = f32::MAX;
 
-const SPHERES: &[Sphere] = &[
-    Sphere::new(Vec3::new(0.0, -1.0, 3.0), 1.0, Color::RED, None, None),
-    Sphere::new(Vec3::new(2.0, 0.0, 4.0), 1.0, Color::BLUE, None, None),
-    Sphere::new(Vec3::new(-2.0, 0.0, 4.0), 1.0, Color::GREEN, None, None),
+const SPHERES: &[Shape] = &[
+    Shape::new_sphere(
+        Vec3::new(0.0, -1.0, 3.0),
+        1.0,
+        Material::new(Color::RED, None, None),
+    ),
+    Shape::new_sphere(
+        Vec3::new(2.0, 0.0, 4.0),
+        1.0,
+        Material::new(Color::BLUE, None, None),
+    ),
+    Shape::new_sphere(
+        Vec3::new(-2.0, 0.0, 4.0),
+        1.0,
+        Material::new(Color::GREEN, None, None),
+    ),
 ];
 
 fn trace_ray(origin: Vec3, direction: Vec3, t_min: f32, t_max: f32) -> Color {
@@ -34,7 +46,7 @@ fn trace_ray(origin: Vec3, direction: Vec3, t_min: f32, t_max: f32) -> Color {
     }
 
     if let Some(closest_sphere) = closest_sphere {
-        SPHERES[closest_sphere].get_color()
+        SPHERES[closest_sphere].get_material().get_color()
     } else {
         BACKGROUND_COLOR
     }

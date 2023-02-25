@@ -2,6 +2,7 @@ use glam::Vec3;
 
 use crate::math::reflect_ray;
 
+#[derive(Debug, Copy, Clone)]
 pub struct AmbientLight {
     intensity: f32,
 }
@@ -48,6 +49,7 @@ fn diffuse_specular(intensity: f32, normal: Vec3, l: Vec3, v: Vec3, shininess: O
     diffuse + specular
 }
 
+#[derive(Debug, Copy, Clone)]
 pub struct PointLight {
     intensity: f32,
     position: Vec3,
@@ -84,6 +86,7 @@ impl PointLight {
     }
 }
 
+#[derive(Debug, Copy, Clone)]
 pub struct DirectionalLight {
     intensity: f32,
     direction: Vec3,
@@ -114,6 +117,7 @@ impl DirectionalLight {
     }
 }
 
+#[derive(Debug, Copy, Clone)]
 pub enum Light {
     Ambient(AmbientLight),
     Point(PointLight),
