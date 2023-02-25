@@ -24,7 +24,7 @@ pub fn closest_intersection(
     let mut closest_t = INFINITY;
     let mut closest_shape_idx = None;
 
-    for (idx, shape) in shapes.iter().enumerate() {
+    shapes.iter().enumerate().for_each(|(idx, shape)| {
         if let Some((t1, t2)) = shape.intersect_ray(origin, direction) {
             if (t_min..=t_max).contains(&t1) && t1 < closest_t {
                 closest_t = t1;
@@ -36,7 +36,7 @@ pub fn closest_intersection(
                 closest_shape_idx = Some(idx);
             }
         }
-    }
+    });
 
     (closest_shape_idx, closest_t)
 }
@@ -56,7 +56,7 @@ pub fn trace_ray_no_lights(
     let mut closest_t = INFINITY;
     let mut closest_shape_idx = None;
 
-    for (idx, shape) in shapes.iter().enumerate() {
+    shapes.iter().enumerate().for_each(|(idx, shape)| {
         if let Some((t1, t2)) = shape.intersect_ray(origin, direction) {
             if (t_min..=t_max).contains(&t1) && t1 < closest_t {
                 closest_t = t1;
@@ -68,7 +68,7 @@ pub fn trace_ray_no_lights(
                 closest_shape_idx = Some(idx);
             }
         }
-    }
+    });
 
     if let Some(closest_shape_idx) = closest_shape_idx {
         shapes[closest_shape_idx].get_material().get_color()

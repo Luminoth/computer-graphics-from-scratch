@@ -25,6 +25,8 @@ const SPHERES: &[Shape] = &[
 
 fn render(canvas: &Canvas) -> anyhow::Result<()> {
     let camera = Camera::default();
+
+    // TODO: parallelize this
     for x in -canvas.get_half_width()..=canvas.get_half_width() {
         for y in -canvas.get_half_height()..=canvas.get_half_height() {
             let direction = camera.get_rotation() * canvas.to_viewport(x, y);
