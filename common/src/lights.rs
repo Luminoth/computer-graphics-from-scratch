@@ -1,6 +1,9 @@
 use glam::Vec3;
 
-use crate::math::reflect_ray;
+use crate::math::*;
+use crate::shapes::*;
+
+pub(crate) const SURFACE_EPSILON: f32 = 0.001;
 
 #[derive(Debug, Copy, Clone)]
 pub struct AmbientLight {
@@ -136,4 +139,48 @@ impl Light {
     pub const fn new_directional(intensity: f32, direction: Vec3) -> Self {
         Self::Directional(DirectionalLight::new(intensity, direction))
     }
+}
+
+/// Compute the lighting at the given point with the given normal and light direction
+pub fn compute_lighting(
+    point: Vec3,
+    normal: Vec3,
+    light_direction: Vec3,
+    shininess: Option<f32>,
+    lights: impl AsRef<[Light]>,
+    shapes: impl AsRef<[Shape]>,
+) -> f32 {
+    assert!(normal.is_normalized());
+
+    let shapes = shapes.as_ref();
+
+    lights
+        .as_ref()
+        .iter()
+        .map(|light| match light {
+            Light::Ambient(light) => light.get_contribution(),
+            Light::Point(light) => {
+                let l = light.get_position() - point;
+                let t_max = 1.0;
+                let (shadow_shape, _) =
+                    closest_intersection(point, l, SURFACE_EPSILON, t_max, shapes);
+                if shadow_shape.is_some() {
+                    0.0
+                } else {
+                    light.get_contribution(point, normal, light_direction, shininess)
+                }
+            }
+            Light::Directional(light) => {
+                let l = light.get_direction();
+                let t_max = INFINITY;
+                let (shadow_shape, _) =
+                    closest_intersection(point, l, SURFACE_EPSILON, t_max, shapes);
+                if shadow_shape.is_some() {
+                    0.0
+                } else {
+                    light.get_contribution(normal, light_direction, shininess)
+                }
+            }
+        })
+        .sum()
 }
