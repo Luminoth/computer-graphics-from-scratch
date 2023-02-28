@@ -1,22 +1,22 @@
-use glam::Vec3;
+use glam::DVec3;
 use sdl2::pixels::Color;
 
 use crate::lights::*;
 use crate::shapes::*;
 
-pub const INFINITY: f32 = f32::MAX;
+pub const INFINITY: f64 = f64::MAX;
 
 /// Reflects a ray around a normal
-pub fn reflect_ray(r: Vec3, n: Vec3) -> Vec3 {
+pub fn reflect_ray(r: DVec3, n: DVec3) -> DVec3 {
     2.0 * n * n.dot(r) - r
 }
 
 /// Checks to see if the given ray intersects a shape
 pub fn does_intersect(
-    origin: Vec3,
-    direction: Vec3,
-    t_min: f32,
-    t_max: f32,
+    origin: DVec3,
+    direction: DVec3,
+    t_min: f64,
+    t_max: f64,
     shapes: impl AsRef<[Shape]>,
 ) -> bool {
     let shapes = shapes.as_ref();
@@ -38,12 +38,12 @@ pub fn does_intersect(
 
 /// Finds the shape closest to the origin that intersects the ray between t_min / t_max
 pub fn closest_intersection(
-    origin: Vec3,
-    direction: Vec3,
-    t_min: f32,
-    t_max: f32,
+    origin: DVec3,
+    direction: DVec3,
+    t_min: f64,
+    t_max: f64,
     shapes: impl AsRef<[Shape]>,
-) -> (Option<usize>, f32) {
+) -> (Option<usize>, f64) {
     let shapes = shapes.as_ref();
 
     let mut closest_t = INFINITY;
@@ -70,10 +70,10 @@ pub fn closest_intersection(
 /// Trace the given ray and return the intersection color
 #[allow(clippy::too_many_arguments)]
 pub fn trace_ray_no_lights(
-    origin: Vec3,
-    direction: Vec3,
-    t_min: f32,
-    t_max: f32,
+    origin: DVec3,
+    direction: DVec3,
+    t_min: f64,
+    t_max: f64,
     shapes: impl AsRef<[Shape]>,
     background: Color,
 ) -> Color {
@@ -107,10 +107,10 @@ pub fn trace_ray_no_lights(
 /// Trace the given ray and return the intersection color
 #[allow(clippy::too_many_arguments)]
 pub fn trace_ray(
-    origin: Vec3,
-    direction: Vec3,
-    t_min: f32,
-    t_max: f32,
+    origin: DVec3,
+    direction: DVec3,
+    t_min: f64,
+    t_max: f64,
     reflection_depth: usize,
     lights: impl AsRef<[Light]>,
     shapes: impl AsRef<[Shape]>,
@@ -125,7 +125,7 @@ pub fn trace_ray(
         let closest_shape = &shapes[closest_shape_idx];
 
         let p = origin + closest_t * direction;
-        let n = p - closest_shape.get_center();
+        let n = p - closest_shape.get_center().as_dvec3();
         let n = n.normalize_or_zero();
 
         let material = closest_shape.get_material();

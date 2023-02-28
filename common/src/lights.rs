@@ -1,9 +1,9 @@
-use glam::Vec3;
+use glam::{DVec3, Vec3};
 
 use crate::math::*;
 use crate::shapes::*;
 
-pub(crate) const SURFACE_EPSILON: f32 = 0.001;
+pub(crate) const SURFACE_EPSILON: f64 = 0.001;
 
 #[derive(Debug, Copy, Clone)]
 pub struct AmbientLight {
@@ -26,7 +26,15 @@ impl AmbientLight {
     }
 }
 
-fn diffuse_specular(intensity: f32, normal: Vec3, l: Vec3, v: Vec3, shininess: Option<f32>) -> f32 {
+fn diffuse_specular(
+    intensity: f32,
+    normal: DVec3,
+    l: DVec3,
+    v: DVec3,
+    shininess: Option<f32>,
+) -> f32 {
+    let intensity = intensity as f64;
+
     // diffuse
     let d = normal.dot(l);
     let diffuse = if d > 0.0 {
@@ -41,7 +49,7 @@ fn diffuse_specular(intensity: f32, normal: Vec3, l: Vec3, v: Vec3, shininess: O
 
         let d = r.dot(v);
         if d > 0.0 {
-            intensity * (d / (r.length() * v.length())).powf(shininess)
+            intensity * (d / (r.length() * v.length())).powf(shininess as f64)
         } else {
             0.0
         }
@@ -49,7 +57,7 @@ fn diffuse_specular(intensity: f32, normal: Vec3, l: Vec3, v: Vec3, shininess: O
         0.0
     };
 
-    diffuse + specular
+    (diffuse + specular) as f32
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -79,12 +87,12 @@ impl PointLight {
     #[inline]
     pub fn get_contribution(
         &self,
-        point: Vec3,
-        normal: Vec3,
-        v: Vec3,
+        point: DVec3,
+        normal: DVec3,
+        v: DVec3,
         shininess: Option<f32>,
     ) -> f32 {
-        let l = self.get_position() - point;
+        let l = self.get_position().as_dvec3() - point;
         diffuse_specular(self.get_intensity(), normal, l, v, shininess)
     }
 }
@@ -114,8 +122,8 @@ impl DirectionalLight {
     }
 
     #[inline]
-    pub fn get_contribution(&self, normal: Vec3, v: Vec3, shininess: Option<f32>) -> f32 {
-        let l = self.get_direction();
+    pub fn get_contribution(&self, normal: DVec3, v: DVec3, shininess: Option<f32>) -> f32 {
+        let l = self.get_direction().as_dvec3();
         diffuse_specular(self.get_intensity(), normal, l, v, shininess)
     }
 }
@@ -143,9 +151,9 @@ impl Light {
 
 /// Compute the lighting at the given point with the given normal and light direction
 pub fn compute_lighting(
-    point: Vec3,
-    normal: Vec3,
-    light_direction: Vec3,
+    point: DVec3,
+    normal: DVec3,
+    light_direction: DVec3,
     shininess: Option<f32>,
     lights: impl AsRef<[Light]>,
     shapes: impl AsRef<[Shape]>,
@@ -160,7 +168,7 @@ pub fn compute_lighting(
         .map(|light| match light {
             Light::Ambient(light) => light.get_contribution(),
             Light::Point(light) => {
-                let l = light.get_position() - point;
+                let l = light.get_position().as_dvec3() - point;
                 let t_max = 1.0;
                 if does_intersect(point, l, SURFACE_EPSILON, t_max, shapes) {
                     0.0
@@ -169,7 +177,7 @@ pub fn compute_lighting(
                 }
             }
             Light::Directional(light) => {
-                let l = light.get_direction();
+                let l = light.get_direction().as_dvec3();
                 let t_max = INFINITY;
                 if does_intersect(point, l, SURFACE_EPSILON, t_max, shapes) {
                     0.0

@@ -1,4 +1,4 @@
-use glam::Vec3;
+use glam::{DVec3, Vec3};
 use sdl2::pixels::Color;
 
 #[derive(Debug, Copy, Clone)]
@@ -85,9 +85,9 @@ impl Sphere {
     }
 
     // page 20 - 22
-    pub fn intersect_ray(&self, origin: Vec3, direction: Vec3) -> Option<(f32, f32)> {
-        let r = self.radius;
-        let co = origin - self.center;
+    fn intersect_ray(&self, origin: DVec3, direction: DVec3) -> Option<(f64, f64)> {
+        let r = self.radius as f64;
+        let co = origin - self.center.as_dvec3();
 
         let a = direction.dot(direction);
         let b = 2.0 * co.dot(direction);
@@ -134,7 +134,7 @@ impl Shape {
     }
 
     #[inline]
-    pub fn intersect_ray(&self, origin: Vec3, direction: Vec3) -> Option<(f32, f32)> {
+    pub fn intersect_ray(&self, origin: DVec3, direction: DVec3) -> Option<(f64, f64)> {
         match self {
             Self::Sphere(sphere) => sphere.intersect_ray(origin, direction),
         }
