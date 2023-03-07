@@ -67,6 +67,50 @@ impl Canvas {
             .map_err(anyhow::Error::msg)
     }
 
+    pub fn draw_line(&self, p0: Point, p1: Point, color: Color) -> anyhow::Result<()> {
+        let x0 = p0.x() as f32;
+        let x1 = p1.x() as f32;
+        let dx = x1 - x0;
+
+        let y0 = p0.y() as f32;
+        let y1 = p1.y() as f32;
+        let dy = y1 - y0;
+
+        if dx.abs() > dy.abs() {
+            // horizontal-ish line
+
+            // always draw left-to-right
+            if x0 > x1 {
+                return self.draw_line(p1, p0, color);
+            }
+
+            let a = dy / dx;
+
+            let mut y = y0;
+            for x in p0.x()..=p1.x() {
+                self.put_pixel(Point::new(x, y as i32), color)?;
+                y = y + a;
+            }
+        } else {
+            // vertical-ish line
+
+            // always draw bottom-to-top
+            if y0 > y1 {
+                return self.draw_line(p1, p0, color);
+            }
+
+            let a = dx / dy;
+
+            let mut x = x0;
+            for y in p0.y()..=p1.y() {
+                self.put_pixel(Point::new(x as i32, y), color)?;
+                x = x + a;
+            }
+        }
+
+        Ok(())
+    }
+
     pub fn present(&self) {
         self.canvas.borrow_mut().present();
     }

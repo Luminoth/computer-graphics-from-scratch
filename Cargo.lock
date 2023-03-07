@@ -61,6 +61,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "chapter6"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "common",
+ "sdl2",
+]
+
+[[package]]
 name = "common"
 version = "0.1.0"
 dependencies = [
