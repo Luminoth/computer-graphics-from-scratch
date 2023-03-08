@@ -84,12 +84,16 @@ impl Canvas {
                 return self.draw_line(p1, p0, color);
             }
 
-            let a = dy / dx;
+            /*let a = dy / dx;
 
             let mut y = y0;
             for x in p0.x()..=p1.x() {
                 self.put_pixel(Point::new(x, y as i32), color)?;
-                y = y + a;
+                y += a;
+            }*/
+            let ys = crate::math::interpolate(p0.x(), y0, p1.x(), y1);
+            for x in p0.x()..=p1.x() {
+                self.put_pixel(Point::new(x, ys[(x - p0.x()) as usize] as i32), color)?;
             }
         } else {
             // vertical-ish line
@@ -99,12 +103,16 @@ impl Canvas {
                 return self.draw_line(p1, p0, color);
             }
 
-            let a = dx / dy;
+            /*let a = dx / dy;
 
             let mut x = x0;
             for y in p0.y()..=p1.y() {
                 self.put_pixel(Point::new(x as i32, y), color)?;
-                x = x + a;
+                x += a;
+            }*/
+            let xs = crate::math::interpolate(p0.y(), x0, p1.y(), x1);
+            for y in p0.y()..=p1.y() {
+                self.put_pixel(Point::new(xs[(y - p0.y()) as usize] as i32, y), color)?;
             }
         }
 

@@ -1,6 +1,7 @@
 use glam::{DVec3, Vec3};
 
 use crate::math::*;
+use crate::ray::*;
 use crate::shapes::*;
 
 pub(crate) const SURFACE_EPSILON: f64 = 0.001;
