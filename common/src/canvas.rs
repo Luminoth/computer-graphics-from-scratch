@@ -119,6 +119,20 @@ impl Canvas {
         Ok(())
     }
 
+    pub fn draw_wireframe_triangle(
+        &self,
+        p0: Point,
+        p1: Point,
+        p2: Point,
+        color: Color,
+    ) -> anyhow::Result<()> {
+        self.draw_line(p0, p1, color)?;
+        self.draw_line(p1, p2, color)?;
+        self.draw_line(p2, p0, color)?;
+
+        Ok(())
+    }
+
     pub fn present(&self) {
         self.canvas.borrow_mut().present();
     }
