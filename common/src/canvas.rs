@@ -3,6 +3,8 @@ use std::cell::RefCell;
 use glam::{IVec3, Vec3};
 use sdl2::{pixels::Color, rect::Point, render::Canvas as SDLCanvas, video::Window};
 
+use crate::math::*;
+
 pub struct Canvas {
     half_width: i32,
     width_ratio: f32,
@@ -91,9 +93,10 @@ impl Canvas {
                 self.put_pixel(Point::new(x, y as i32), color)?;
                 y += a;
             }*/
-            let ys = crate::math::interpolate(p0.x(), y0, p1.x(), y1);
+            let ys = interpolate(p0.x(), y0, p1.x(), y1);
             for x in p0.x()..=p1.x() {
-                self.put_pixel(Point::new(x, ys[(x - p0.x()) as usize] as i32), color)?;
+                let idx = (x - p0.x()) as usize;
+                self.put_pixel(Point::new(x, ys[idx] as i32), color)?;
             }
         } else {
             // vertical-ish line
@@ -110,9 +113,10 @@ impl Canvas {
                 self.put_pixel(Point::new(x as i32, y), color)?;
                 x += a;
             }*/
-            let xs = crate::math::interpolate(p0.y(), x0, p1.y(), x1);
+            let xs = interpolate(p0.y(), x0, p1.y(), x1);
             for y in p0.y()..=p1.y() {
-                self.put_pixel(Point::new(xs[(y - p0.y()) as usize] as i32, y), color)?;
+                let idx = (y - p0.y()) as usize;
+                self.put_pixel(Point::new(xs[idx] as i32, y), color)?;
             }
         }
 
@@ -129,6 +133,61 @@ impl Canvas {
         self.draw_line(p0, p1, color)?;
         self.draw_line(p1, p2, color)?;
         self.draw_line(p2, p0, color)?;
+
+        Ok(())
+    }
+
+    pub fn draw_filled_triangle(
+        &self,
+        mut p0: Point,
+        mut p1: Point,
+        mut p2: Point,
+        color: Color,
+    ) -> anyhow::Result<()> {
+        // sort points by increasing y (p0 is bottom, p2 is top)
+        if p1.y() < p0.y() {
+            swap_points(&mut p0, &mut p1)
+        }
+        if p2.y() < p0.y() {
+            swap_points(&mut p0, &mut p2)
+        }
+        if p2.y() < p1.y() {
+            swap_points(&mut p1, &mut p2)
+        }
+
+        let x0 = p0.x() as f32;
+        let x1 = p1.x() as f32;
+        let x2 = p2.x() as f32;
+
+        // compute edge x-coordinates
+        let mut x01 = interpolate(p0.y(), x0, p1.y(), x1);
+        let mut x12 = interpolate(p1.y(), x1, p2.y(), x2);
+        let x02 = interpolate(p0.y(), x0, p2.y(), x2);
+
+        // concatenate the short sides (x1 and x12)
+        x01.pop(); // remove overlapping point first
+        x01.append(&mut x12);
+        let x012 = x01;
+
+        // determine which is left or right by comparing the middle row
+        let mut x_left = &x012;
+        let mut x_right = &x02;
+        let m = x02.len() / 2;
+        if x02[m] < x012[m] {
+            x_left = &x02;
+            x_right = &x012;
+        }
+
+        // draw the horizontal segments
+        for y in p0.y()..=p2.y() {
+            let idx = (y - p0.y()) as usize;
+            let left = x_left[idx] as i32;
+            let right = x_right[idx] as i32;
+
+            for x in left..=right {
+                self.put_pixel(Point::new(x, y), color)?;
+            }
+        }
 
         Ok(())
     }

@@ -1,4 +1,11 @@
+use sdl2::rect::Point;
+
 pub const INFINITY: f64 = f64::MAX;
+
+#[inline]
+pub(crate) fn swap_points(p0: &mut Point, p1: &mut Point) {
+    std::mem::swap(p0, p1);
+}
 
 /// Linear interpolation of d wrt i
 pub fn interpolate(i0: i32, d0: f32, i1: i32, d1: f32) -> Vec<f32> {
