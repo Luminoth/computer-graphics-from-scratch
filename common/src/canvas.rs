@@ -70,6 +70,12 @@ impl Canvas {
     }
 
     pub fn draw_line(&self, p0: Point, p1: Point, color: Color) -> anyhow::Result<()> {
+        // NOTE: Bresenham's line algorithm is an example of a more optimal way to do this
+        // https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
+        //
+        // DDA is another option for this
+        // https://en.wikipedia.org/wiki/Digital_differential_analyzer_(graphics_algorithm)
+
         let x0 = p0.x() as f32;
         let x1 = p1.x() as f32;
         let dx = x1 - x0;
@@ -144,6 +150,9 @@ impl Canvas {
         mut p2: Point,
         color: Color,
     ) -> anyhow::Result<()> {
+        // NOTE: DDA is another option for this
+        // https://en.wikipedia.org/wiki/Digital_differential_analyzer_(graphics_algorithm)
+
         // sort points by increasing y (p0 is bottom, p2 is top)
         if p1.y() < p0.y() {
             swap_points(&mut p0, &mut p1)
