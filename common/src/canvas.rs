@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 
 use glam::{IVec3, Vec3};
-use sdl2::{pixels::Color, rect::Point, render::Canvas as SDLCanvas, video::Window};
+use sdl2::{pixels::Color, render::Canvas as SDLCanvas, video::Window};
 
 use crate::math::*;
 
@@ -61,7 +61,8 @@ impl Canvas {
 
         // SDL coordinate system is top-left center so we need to convert
         // from the book's centered coordinate system first
-        let sdl_point = Point::new(self.half_width + point.x, self.half_height - point.y);
+        let sdl_point =
+            sdl2::rect::Point::new(self.half_width + point.x(), self.half_height - point.y());
 
         self.canvas
             .borrow_mut()
@@ -102,7 +103,7 @@ impl Canvas {
             let ys = interpolate(p0.x(), y0, p1.x(), y1);
             for x in p0.x()..=p1.x() {
                 let idx = (x - p0.x()) as usize;
-                self.put_pixel(Point::new(x, ys[idx] as i32), color)?;
+                self.put_pixel(Point::new(x, ys[idx] as i32, 1.0), color)?;
             }
         } else {
             // vertical-ish line
@@ -122,7 +123,7 @@ impl Canvas {
             let xs = interpolate(p0.y(), x0, p1.y(), x1);
             for y in p0.y()..=p1.y() {
                 let idx = (y - p0.y()) as usize;
-                self.put_pixel(Point::new(xs[idx] as i32, y), color)?;
+                self.put_pixel(Point::new(xs[idx] as i32, y, 1.0), color)?;
             }
         }
 
@@ -144,6 +145,21 @@ impl Canvas {
     }
 
     pub fn draw_filled_triangle(
+        &self,
+        p0: Point,
+        p1: Point,
+        p2: Point,
+        color: Color,
+    ) -> anyhow::Result<()> {
+        self.draw_shaded_triangle(
+            Point::new(p0.x(), p0.y(), 1.0),
+            Point::new(p1.x(), p1.y(), 1.0),
+            Point::new(p2.x(), p2.y(), 1.0),
+            color,
+        )
+    }
+
+    pub fn draw_shaded_triangle(
         &self,
         mut p0: Point,
         mut p1: Point,
@@ -168,33 +184,62 @@ impl Canvas {
         let x1 = p1.x() as f32;
         let x2 = p2.x() as f32;
 
-        // compute edge x-coordinates
-        let mut x01 = interpolate(p0.y(), x0, p1.y(), x1);
-        let mut x12 = interpolate(p1.y(), x1, p2.y(), x2);
-        let x02 = interpolate(p0.y(), x0, p2.y(), x2);
+        let h0 = p0.h();
+        let h1 = p1.h();
+        let h2 = p2.h();
 
-        // concatenate the short sides (x1 and x12)
+        // compute edge x-coordinates and h values of the triangle edges
+        let mut x01 = interpolate(p0.y(), x0, p1.y(), x1);
+        let mut h01 = interpolate(p0.y(), h0, p1.y(), h1);
+
+        let mut x12 = interpolate(p1.y(), x1, p2.y(), x2);
+        let mut h12 = interpolate(p1.y(), h1, p2.y(), h2);
+
+        let x02 = interpolate(p0.y(), x0, p2.y(), x2);
+        let h02 = interpolate(p0.y(), h0, p2.y(), h2);
+
+        // concatenate the short sides (x1/h1 and x12/h12)
         x01.pop(); // remove overlapping point first
         x01.append(&mut x12);
         let x012 = x01;
 
+        h01.pop();
+        h01.append(&mut h12);
+        let h012 = h01;
+
         // determine which is left or right by comparing the middle row
         let mut x_left = &x012;
+        let mut h_left = &h012;
         let mut x_right = &x02;
+        let mut h_right = &h02;
         let m = x02.len() / 2;
         if x02[m] < x012[m] {
             x_left = &x02;
+            h_left = &h02;
+
             x_right = &x012;
+            h_right = &h012;
         }
 
         // draw the horizontal segments
         for y in p0.y()..=p2.y() {
             let idx = (y - p0.y()) as usize;
-            let left = x_left[idx] as i32;
-            let right = x_right[idx] as i32;
+            let x_l = x_left[idx] as i32;
+            let h_l = h_left[idx];
+            let x_r = x_right[idx] as i32;
+            let h_r = h_right[idx];
 
-            for x in left..=right {
-                self.put_pixel(Point::new(x, y), color)?;
+            let h_segment = interpolate(x_l, h_l, x_r, h_r);
+            for x in x_l..=x_r {
+                let idx = (x - x_l) as usize;
+                let c = h_segment[idx];
+
+                let shaded_color = Color::RGB(
+                    (color.r as f32 * c) as u8,
+                    (color.g as f32 * c) as u8,
+                    (color.b as f32 * c) as u8,
+                );
+                self.put_pixel(Point::new(x, y, 1.0), shaded_color)?;
             }
         }
 

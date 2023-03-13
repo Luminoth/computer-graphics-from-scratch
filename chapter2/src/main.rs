@@ -1,5 +1,5 @@
 use glam::Vec3;
-use sdl2::{pixels::Color, rect::Point};
+use sdl2::pixels::Color;
 
 use common::*;
 
@@ -38,7 +38,7 @@ fn render(canvas: &Canvas) -> anyhow::Result<()> {
                 SPHERES,
                 Color::WHITE,
             );
-            canvas.put_pixel(Point::new(x, y), color)?;
+            canvas.put_pixel(Point::new(x, y, 1.0), color)?;
         }
     }
 

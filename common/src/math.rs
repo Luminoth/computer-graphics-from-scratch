@@ -1,6 +1,39 @@
-use sdl2::rect::Point;
-
 pub const INFINITY: f64 = f64::MAX;
+
+#[derive(Debug, Default, Copy, Clone)]
+pub struct Point {
+    x: i32,
+    y: i32,
+    h: f32,
+}
+
+impl From<sdl2::rect::Point> for Point {
+    fn from(point: sdl2::rect::Point) -> Self {
+        Point::new(point.x(), point.y(), 1.0)
+    }
+}
+
+impl Point {
+    #[inline]
+    pub fn new(x: i32, y: i32, h: f32) -> Self {
+        Self { x, y, h }
+    }
+
+    #[inline]
+    pub fn x(&self) -> i32 {
+        self.x
+    }
+
+    #[inline]
+    pub fn y(&self) -> i32 {
+        self.y
+    }
+
+    #[inline]
+    pub fn h(&self) -> f32 {
+        self.h
+    }
+}
 
 #[inline]
 pub(crate) fn swap_points(p0: &mut Point, p1: &mut Point) {

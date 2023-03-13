@@ -2,18 +2,14 @@ use sdl2::pixels::Color;
 
 use common::*;
 
-const WINDOW_TITLE: &str = "Chapter 6";
+const WINDOW_TITLE: &str = "Chapter 8";
 
 fn render(canvas: &Canvas) -> anyhow::Result<()> {
-    canvas.draw_line(
-        Point::new(-200, -100, 1.0),
-        Point::new(240, 120, 1.0),
-        Color::WHITE,
-    )?;
-    canvas.draw_line(
-        Point::new(-50, -200, 1.0),
-        Point::new(60, 240, 1.0),
-        Color::WHITE,
+    canvas.draw_shaded_triangle(
+        Point::new(-200, -250, 0.3),
+        Point::new(200, 50, 0.1),
+        Point::new(20, 250, 1.0),
+        Color::GREEN,
     )?;
 
     Ok(())
