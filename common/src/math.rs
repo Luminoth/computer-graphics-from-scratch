@@ -1,3 +1,5 @@
+use glam::IVec3;
+
 pub const INFINITY: f64 = f64::MAX;
 
 #[derive(Debug, Default, Copy, Clone)]
@@ -10,6 +12,12 @@ pub struct Point {
 impl From<sdl2::rect::Point> for Point {
     fn from(point: sdl2::rect::Point) -> Self {
         Point::new(point.x(), point.y(), 1.0)
+    }
+}
+
+impl From<IVec3> for Point {
+    fn from(v: IVec3) -> Self {
+        Point::new(v.x, v.y, v.z as f32)
     }
 }
 

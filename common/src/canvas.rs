@@ -8,10 +8,13 @@ use crate::math::*;
 pub struct Canvas {
     half_width: i32,
     width_ratio: f32,
+    inv_width_ratio: f32,
+
     half_height: i32,
     height_ratio: f32,
+    inv_height_ratio: f32,
 
-    viewport_distance: i32,
+    viewport_distance: f32,
 
     canvas: RefCell<SDLCanvas<Window>>,
 }
@@ -23,12 +26,17 @@ impl Canvas {
         let size = window.size();
         let canvas = window.into_canvas().build().map_err(anyhow::Error::msg)?;
 
+        let width_ratio = viewport.x as f32 / size.0 as f32;
+        let height_ratio = viewport.y as f32 / size.1 as f32;
+
         Ok(Self {
             half_width: size.0 as i32 / 2,
-            width_ratio: viewport.x as f32 / size.0 as f32,
+            width_ratio,
+            inv_width_ratio: 1.0 / width_ratio,
             half_height: size.1 as i32 / 2,
-            height_ratio: viewport.y as f32 / size.1 as f32,
-            viewport_distance: viewport.z,
+            height_ratio,
+            inv_height_ratio: 1.0 / height_ratio,
+            viewport_distance: viewport.z as f32,
             canvas: RefCell::new(canvas),
         })
     }
@@ -47,7 +55,22 @@ impl Canvas {
         Vec3::new(
             x as f32 * self.width_ratio,
             y as f32 * self.height_ratio,
-            self.viewport_distance as f32,
+            self.viewport_distance,
+        )
+    }
+
+    pub fn from_viewport(&self, x: f32, y: f32) -> Vec3 {
+        Vec3::new(
+            x * self.inv_width_ratio,
+            y * self.inv_height_ratio,
+            self.viewport_distance,
+        )
+    }
+
+    pub fn project(&self, v: Vec3) -> Vec3 {
+        self.from_viewport(
+            v.x * self.viewport_distance / v.z,
+            v.y * self.viewport_distance / v.z,
         )
     }
 
