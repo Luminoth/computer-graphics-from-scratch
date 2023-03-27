@@ -1,3 +1,4 @@
+use glam::Vec3;
 use sdl2::pixels::Color;
 
 use common::*;
@@ -6,9 +7,9 @@ const WINDOW_TITLE: &str = "Chapter 8";
 
 fn render(canvas: &Canvas) -> anyhow::Result<()> {
     canvas.draw_shaded_triangle(
-        Point::new(-200, -250, 0.3),
-        Point::new(200, 50, 0.1),
-        Point::new(20, 250, 1.0),
+        Vec3::new(-200.0, -250.0, 0.3),
+        Vec3::new(200.0, 50.0, 0.1),
+        Vec3::new(20.0, 250.0, 1.0),
         Color::GREEN,
     )?;
 

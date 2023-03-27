@@ -1,3 +1,4 @@
+use glam::Vec3;
 use sdl2::pixels::Color;
 
 use common::*;
@@ -6,16 +7,16 @@ const WINDOW_TITLE: &str = "Chapter 7";
 
 fn render(canvas: &Canvas) -> anyhow::Result<()> {
     canvas.draw_filled_triangle(
-        Point::new(-200, -250, 1.0),
-        Point::new(200, 50, 1.0),
-        Point::new(20, 250, 1.0),
+        Vec3::new(-200.0, -250.0, 1.0),
+        Vec3::new(200.0, 50.0, 1.0),
+        Vec3::new(20.0, 250.0, 1.0),
         Color::GREEN,
     )?;
 
     canvas.draw_wireframe_triangle(
-        Point::new(-200, -250, 1.0),
-        Point::new(200, 50, 1.0),
-        Point::new(20, 250, 1.0),
+        Vec3::new(-200.0, -250.0, 1.0),
+        Vec3::new(200.0, 50.0, 1.0),
+        Vec3::new(20.0, 250.0, 1.0),
         Color::WHITE,
     )?;
 

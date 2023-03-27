@@ -1,51 +1,10 @@
-use glam::IVec3;
+use glam::Vec3;
 
 pub const INFINITY: f64 = f64::MAX;
 
-#[derive(Debug, Default, Copy, Clone)]
-pub struct Point {
-    x: i32,
-    y: i32,
-    h: f32,
-}
-
-impl From<sdl2::rect::Point> for Point {
-    fn from(point: sdl2::rect::Point) -> Self {
-        Point::new(point.x(), point.y(), 1.0)
-    }
-}
-
-impl From<IVec3> for Point {
-    fn from(v: IVec3) -> Self {
-        Point::new(v.x, v.y, v.z as f32)
-    }
-}
-
-impl Point {
-    #[inline]
-    pub fn new(x: i32, y: i32, h: f32) -> Self {
-        Self { x, y, h }
-    }
-
-    #[inline]
-    pub fn x(&self) -> i32 {
-        self.x
-    }
-
-    #[inline]
-    pub fn y(&self) -> i32 {
-        self.y
-    }
-
-    #[inline]
-    pub fn h(&self) -> f32 {
-        self.h
-    }
-}
-
 #[inline]
-pub(crate) fn swap_points(p0: &mut Point, p1: &mut Point) {
-    std::mem::swap(p0, p1);
+pub(crate) fn swap_vertices(v0: &mut Vec3, v1: &mut Vec3) {
+    std::mem::swap(v0, v1);
 }
 
 /// Linear interpolation of d wrt i

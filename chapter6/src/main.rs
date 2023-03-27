@@ -1,3 +1,4 @@
+use glam::Vec3;
 use sdl2::pixels::Color;
 
 use common::*;
@@ -6,13 +7,13 @@ const WINDOW_TITLE: &str = "Chapter 6";
 
 fn render(canvas: &Canvas) -> anyhow::Result<()> {
     canvas.draw_line(
-        Point::new(-200, -100, 1.0),
-        Point::new(240, 120, 1.0),
+        Vec3::new(-200.0, -100.0, 1.0),
+        Vec3::new(240.0, 120.0, 1.0),
         Color::WHITE,
     )?;
     canvas.draw_line(
-        Point::new(-50, -200, 1.0),
-        Point::new(60, 240, 1.0),
+        Vec3::new(-50.0, -200.0, 1.0),
+        Vec3::new(60.0, 240.0, 1.0),
         Color::WHITE,
     )?;
 

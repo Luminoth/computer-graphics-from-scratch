@@ -20,70 +20,22 @@ fn render(canvas: &Canvas) -> anyhow::Result<()> {
     let vDb = Vec3::new(-1.0, -0.5, 6.0);
 
     // front face
-    canvas.draw_line(
-        canvas.project(vAf).as_ivec3().into(),
-        canvas.project(vBf).as_ivec3().into(),
-        Color::BLUE,
-    )?;
-    canvas.draw_line(
-        canvas.project(vBf).as_ivec3().into(),
-        canvas.project(vCf).as_ivec3().into(),
-        Color::BLUE,
-    )?;
-    canvas.draw_line(
-        canvas.project(vCf).as_ivec3().into(),
-        canvas.project(vDf).as_ivec3().into(),
-        Color::BLUE,
-    )?;
-    canvas.draw_line(
-        canvas.project(vDf).as_ivec3().into(),
-        canvas.project(vAf).as_ivec3().into(),
-        Color::BLUE,
-    )?;
+    canvas.draw_line(canvas.project(vAf), canvas.project(vBf), Color::BLUE)?;
+    canvas.draw_line(canvas.project(vBf), canvas.project(vCf), Color::BLUE)?;
+    canvas.draw_line(canvas.project(vCf), canvas.project(vDf), Color::BLUE)?;
+    canvas.draw_line(canvas.project(vDf), canvas.project(vAf), Color::BLUE)?;
 
     // back face
-    canvas.draw_line(
-        canvas.project(vAb).as_ivec3().into(),
-        canvas.project(vBb).as_ivec3().into(),
-        Color::RED,
-    )?;
-    canvas.draw_line(
-        canvas.project(vBb).as_ivec3().into(),
-        canvas.project(vCb).as_ivec3().into(),
-        Color::RED,
-    )?;
-    canvas.draw_line(
-        canvas.project(vCb).as_ivec3().into(),
-        canvas.project(vDb).as_ivec3().into(),
-        Color::RED,
-    )?;
-    canvas.draw_line(
-        canvas.project(vDb).as_ivec3().into(),
-        canvas.project(vAb).as_ivec3().into(),
-        Color::RED,
-    )?;
+    canvas.draw_line(canvas.project(vAb), canvas.project(vBb), Color::RED)?;
+    canvas.draw_line(canvas.project(vBb), canvas.project(vCb), Color::RED)?;
+    canvas.draw_line(canvas.project(vCb), canvas.project(vDb), Color::RED)?;
+    canvas.draw_line(canvas.project(vDb), canvas.project(vAb), Color::RED)?;
 
     // edges
-    canvas.draw_line(
-        canvas.project(vAf).as_ivec3().into(),
-        canvas.project(vAb).as_ivec3().into(),
-        Color::GREEN,
-    )?;
-    canvas.draw_line(
-        canvas.project(vBf).as_ivec3().into(),
-        canvas.project(vBb).as_ivec3().into(),
-        Color::GREEN,
-    )?;
-    canvas.draw_line(
-        canvas.project(vCf).as_ivec3().into(),
-        canvas.project(vCb).as_ivec3().into(),
-        Color::GREEN,
-    )?;
-    canvas.draw_line(
-        canvas.project(vDf).as_ivec3().into(),
-        canvas.project(vDb).as_ivec3().into(),
-        Color::GREEN,
-    )?;
+    canvas.draw_line(canvas.project(vAf), canvas.project(vAb), Color::GREEN)?;
+    canvas.draw_line(canvas.project(vBf), canvas.project(vBb), Color::GREEN)?;
+    canvas.draw_line(canvas.project(vCf), canvas.project(vCb), Color::GREEN)?;
+    canvas.draw_line(canvas.project(vDf), canvas.project(vDb), Color::GREEN)?;
 
     Ok(())
 }
