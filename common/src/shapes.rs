@@ -18,6 +18,12 @@ impl Default for Material {
     }
 }
 
+impl From<Color> for Material {
+    fn from(color: Color) -> Self {
+        Self::new(color, None, None)
+    }
+}
+
 impl Material {
     pub const fn new(color: Color, shininess: Option<f32>, reflectiveness: Option<f32>) -> Self {
         Self {
@@ -138,5 +144,39 @@ impl Shape {
         match self {
             Self::Sphere(sphere) => sphere.intersect_ray(origin, direction),
         }
+    }
+}
+
+#[derive(Debug, Copy, Clone)]
+pub struct Triangle {
+    vertices: [usize; 3],
+    material: Material,
+}
+
+impl Default for Triangle {
+    fn default() -> Self {
+        Self {
+            vertices: [0, 1, 2],
+            material: Material::default(),
+        }
+    }
+}
+
+impl Triangle {
+    pub const fn new(a: usize, b: usize, c: usize, material: Material) -> Self {
+        Self {
+            vertices: [a, b, c],
+            material,
+        }
+    }
+
+    #[inline]
+    pub fn get_vertices(&self) -> &[usize; 3] {
+        &self.vertices
+    }
+
+    #[inline]
+    pub fn get_material(&self) -> Material {
+        self.material
     }
 }

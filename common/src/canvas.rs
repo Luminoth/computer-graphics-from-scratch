@@ -4,6 +4,7 @@ use glam::{IVec3, Vec3};
 use sdl2::{pixels::Color, render::Canvas as SDLCanvas, video::Window};
 
 use crate::math::*;
+use crate::shapes::Triangle;
 
 pub struct Canvas {
     half_width: i32,
@@ -264,6 +265,38 @@ impl Canvas {
         }
 
         Ok(())
+    }
+
+    pub fn render_object(
+        &self,
+        vertices: impl AsRef<[Vec3]>,
+        triangles: impl AsRef<[Triangle]>,
+    ) -> anyhow::Result<()> {
+        let mut projected = Vec::with_capacity(vertices.as_ref().len());
+        for v in vertices.as_ref() {
+            projected.push(self.project(*v));
+        }
+
+        for t in triangles.as_ref() {
+            self.render_triangle(*t, &projected)?;
+        }
+
+        Ok(())
+    }
+
+    fn render_triangle(
+        &self,
+        triangle: Triangle,
+        projected: impl AsRef<[Vec3]>,
+    ) -> anyhow::Result<()> {
+        let projected = projected.as_ref();
+
+        self.draw_wireframe_triangle(
+            projected[triangle.get_vertices()[0]],
+            projected[triangle.get_vertices()[1]],
+            projected[triangle.get_vertices()[2]],
+            triangle.get_material().get_color(),
+        )
     }
 
     pub fn present(&self) {
