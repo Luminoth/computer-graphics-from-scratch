@@ -116,6 +116,7 @@ impl Sphere {
     }
 }
 
+#[derive(Debug, Clone)]
 pub enum Shape {
     Sphere(Sphere),
 }
