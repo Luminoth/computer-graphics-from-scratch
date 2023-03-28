@@ -3,6 +3,69 @@ use sdl2::pixels::Color;
 
 use crate::{Material, Triangle};
 
+#[derive(Debug, Clone)]
+pub struct Transform {
+    scale: f32,
+    rotation: Vec3,
+    translation: Vec3,
+}
+
+impl Default for Transform {
+    fn default() -> Self {
+        Self {
+            scale: 1.0,
+            rotation: Vec3::default(),
+            translation: Vec3::default(),
+        }
+    }
+}
+
+impl Transform {
+    pub fn from_translation(translation: Vec3) -> Self {
+        Self {
+            scale: 1.0,
+            rotation: Vec3::default(),
+            translation,
+        }
+    }
+
+    #[inline]
+    pub fn get_scale(&self) -> f32 {
+        self.scale
+    }
+
+    #[inline]
+    pub fn get_rotation(&self) -> Vec3 {
+        self.rotation
+    }
+
+    #[inline]
+    pub fn get_translation(&self) -> Vec3 {
+        self.translation
+    }
+
+    fn scale(&self, v: Vec3) -> Vec3 {
+        v * self.scale
+    }
+
+    fn rotate(&self, v: Vec3) -> Vec3 {
+        // TODO:
+        v
+    }
+
+    fn translate(&self, v: Vec3) -> Vec3 {
+        v + self.translation
+    }
+
+    pub fn apply(&self, v: Vec3) -> Vec3 {
+        let scaled = self.scale(v);
+        let rotated = self.rotate(scaled);
+        let translated = self.translate(rotated);
+
+        translated
+    }
+}
+
 const CUBE_VERTICES: [Vec3; 8] = [
     Vec3::new(1.0, 1.0, 1.0),
     Vec3::new(-1.0, 1.0, 1.0),
@@ -68,14 +131,14 @@ impl Model {
 #[derive(Debug, Clone)]
 pub struct Instance {
     model: Model,
-    position: Vec3,
+    transform: Transform,
 }
 
 impl Instance {
-    pub fn new_cube(position: Vec3) -> Self {
+    pub fn new_cube(transform: Transform) -> Self {
         Self {
             model: Model::Cube(Cube::default()),
-            position,
+            transform,
         }
     }
 
@@ -85,7 +148,7 @@ impl Instance {
     }
 
     #[inline]
-    pub fn get_position(&self) -> Vec3 {
-        self.position
+    pub fn get_transform(&self) -> &Transform {
+        &self.transform
     }
 }

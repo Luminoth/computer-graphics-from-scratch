@@ -297,7 +297,7 @@ impl Canvas {
 
         let mut projected = Vec::with_capacity(model.get_vertices().len());
         for v in model.get_vertices() {
-            let v = *v + instance.get_position();
+            let v = instance.get_transform().apply(*v);
             projected.push(self.project(v));
         }
 
