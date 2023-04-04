@@ -1,39 +1,41 @@
-use glam::{EulerRot, Quat, Vec3};
+use glam::{Mat4, Quat, Vec3};
 
 #[derive(Debug, Default, Clone)]
 pub struct Camera {
-    position: Vec3,
+    translation: Vec3,
     rotation: Quat,
 }
 
 impl Camera {
-    // rotation here is in degrees
-    pub fn new(position: Vec3, rotation: Vec3) -> Self {
+    pub fn new(translation: Vec3, rotation: Quat) -> Self {
         Self {
-            position,
-            rotation: Quat::from_euler(
-                EulerRot::YXZ,
-                rotation.x.to_radians(),
-                rotation.y.to_radians(),
-                rotation.z.to_radians(),
-            ),
+            translation,
+            rotation,
         }
     }
 
-    pub fn from_position(position: Vec3) -> Self {
+    pub fn from_translation(translation: Vec3) -> Self {
         Self {
-            position,
+            translation,
             rotation: Quat::default(),
         }
     }
 
     #[inline]
-    pub fn get_position(&self) -> Vec3 {
-        self.position
+    pub fn get_translation(&self) -> Vec3 {
+        self.translation
     }
 
     #[inline]
     pub fn get_rotation(&self) -> Quat {
         self.rotation
+    }
+
+    #[inline]
+    pub fn get_matrix(&self) -> Mat4 {
+        // TODO: this is not right?
+        // should be: var cameraMatrix = MultiplyMM4(Transposed(camera.orientation), MakeTranslationMatrix(Multiply(-1, camera.position)));
+        // not sure how I'm supposed to transpose the rotation? or if it's even necessary here?
+        Mat4::from_rotation_translation(self.rotation, -1.0 * self.translation)
     }
 }

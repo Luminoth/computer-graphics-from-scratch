@@ -1,31 +1,47 @@
-use glam::Vec3;
+use glam::{Mat4, Quat, Vec3, Vec4};
 use sdl2::pixels::Color;
 
 use crate::{Material, Triangle};
 
 #[derive(Debug, Clone)]
 pub struct Transform {
-    scale: f32,
-    rotation: Vec3,
     translation: Vec3,
+    rotation: Quat,
+    scale: f32,
 }
 
 impl Default for Transform {
     fn default() -> Self {
         Self {
-            scale: 1.0,
-            rotation: Vec3::default(),
             translation: Vec3::default(),
+            rotation: Quat::default(),
+            scale: 1.0,
         }
     }
 }
 
+impl From<Mat4> for Transform {
+    fn from(v: Mat4) -> Self {
+        let (scale, rotation, translation) = v.to_scale_rotation_translation();
+        //assert!(scale.x. == scale.y && scale.y == scale.z, "{}", scale);
+        Self::new(translation, rotation, scale.x)
+    }
+}
+
 impl Transform {
+    pub fn new(translation: Vec3, rotation: Quat, scale: f32) -> Self {
+        Self {
+            translation,
+            rotation,
+            scale,
+        }
+    }
+
     pub fn from_translation(translation: Vec3) -> Self {
         Self {
-            scale: 1.0,
-            rotation: Vec3::default(),
             translation,
+            rotation: Quat::default(),
+            scale: 1.0,
         }
     }
 
@@ -35,7 +51,7 @@ impl Transform {
     }
 
     #[inline]
-    pub fn get_rotation(&self) -> Vec3 {
+    pub fn get_rotation(&self) -> Quat {
         self.rotation
     }
 
@@ -44,25 +60,67 @@ impl Transform {
         self.translation
     }
 
+    #[inline]
+    pub fn get_matrix(&self) -> Mat4 {
+        Mat4::from_scale_rotation_translation(
+            Vec3::new(self.scale, self.scale, self.scale),
+            self.rotation,
+            self.translation,
+        )
+    }
+
+    #[inline]
+    #[allow(dead_code)]
     fn scale(&self, v: Vec3) -> Vec3 {
         v * self.scale
     }
 
+    #[inline]
+    #[allow(dead_code)]
     fn rotate(&self, v: Vec3) -> Vec3 {
-        // TODO:
-        v
+        self.rotation * v
     }
 
+    #[inline]
+    #[allow(dead_code)]
     fn translate(&self, v: Vec3) -> Vec3 {
         v + self.translation
     }
+}
 
-    pub fn apply(&self, v: Vec3) -> Vec3 {
-        let scaled = self.scale(v);
-        let rotated = self.rotate(scaled);
-        let translated = self.translate(rotated);
+impl std::ops::Mul<Vec4> for Transform {
+    type Output = Vec4;
 
-        translated
+    #[inline]
+    fn mul(self, rhs: Vec4) -> Vec4 {
+        self.get_matrix() * rhs
+    }
+}
+
+impl std::ops::Mul<Vec4> for &Transform {
+    type Output = Vec4;
+
+    #[inline]
+    fn mul(self, rhs: Vec4) -> Vec4 {
+        self.get_matrix() * rhs
+    }
+}
+
+impl std::ops::Mul<Transform> for Mat4 {
+    type Output = Transform;
+
+    #[inline]
+    fn mul(self, rhs: Transform) -> Transform {
+        (self * rhs.get_matrix()).into()
+    }
+}
+
+impl std::ops::Mul<&Transform> for Mat4 {
+    type Output = Transform;
+
+    #[inline]
+    fn mul(self, rhs: &Transform) -> Transform {
+        (self * rhs.get_matrix()).into()
     }
 }
 

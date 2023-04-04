@@ -44,7 +44,7 @@ fn render(canvas: &Canvas) -> anyhow::Result<()> {
         for y in -canvas.get_half_height()..=canvas.get_half_height() {
             let direction = camera.get_rotation() * canvas.to_viewport(x, y);
             let color = trace_ray(
-                camera.get_position().as_dvec3(),
+                camera.get_translation().as_dvec3(),
                 direction.as_dvec3(),
                 1.0,
                 INFINITY,

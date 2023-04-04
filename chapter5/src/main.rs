@@ -1,4 +1,4 @@
-use glam::{IVec3, Vec3};
+use glam::{EulerRot, IVec3, Quat, Vec3};
 use sdl2::pixels::Color;
 
 use common::*;
@@ -37,14 +37,22 @@ const LIGHTS: &[Light] = &[
 const REFLECT_DEPTH: usize = 3;
 
 fn render(canvas: &Canvas) -> anyhow::Result<()> {
-    let camera = Camera::new(Vec3::new(5.0, 5.0, -15.0), Vec3::new(-10.0, 10.0, 0.0));
+    let camera = Camera::new(
+        Vec3::new(5.0, 5.0, -15.0),
+        Quat::from_euler(
+            EulerRot::YXZ,
+            -10.0_f32.to_radians(),
+            10.0_f32.to_radians(),
+            0.0_f32.to_radians(),
+        ),
+    );
 
     // TODO: parallelize this
     for x in -canvas.get_half_width()..=canvas.get_half_width() {
         for y in -canvas.get_half_height()..=canvas.get_half_height() {
             let direction = camera.get_rotation() * canvas.to_viewport(x, y);
             let color = trace_ray(
-                camera.get_position().as_dvec3(),
+                camera.get_translation().as_dvec3(),
                 direction.as_dvec3(),
                 1.0,
                 INFINITY,

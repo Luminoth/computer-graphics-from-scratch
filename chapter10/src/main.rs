@@ -1,4 +1,4 @@
-use glam::Vec3;
+use glam::{Quat, Vec3};
 
 use common::*;
 
@@ -7,14 +7,23 @@ const WINDOW_TITLE: &str = "Chapter 10";
 #[allow(non_snake_case)]
 fn render(canvas: &Canvas) -> anyhow::Result<()> {
     let mut scene = Scene::default();
-    scene.add_instance(Instance::new_cube(Transform::from_translation(Vec3::new(
-        0.0, 0.0, 5.0,
-    ))));
-    scene.add_instance(Instance::new_cube(Transform::from_translation(Vec3::new(
-        1.0, 2.0, 3.0,
-    ))));
+    scene.add_instance(Instance::new_cube(Transform::new(
+        Vec3::new(-1.5, 0.0, 7.0),
+        Quat::default(),
+        0.75,
+    )));
+    scene.add_instance(Instance::new_cube(Transform::new(
+        Vec3::new(1.25, 2.5, 7.5),
+        Quat::from_rotation_y(195.0_f32.to_radians()),
+        1.0,
+    )));
 
-    canvas.render_scene(&scene)?;
+    let camera = Camera::new(
+        Vec3::new(-3.0, 1.0, 2.0),
+        Quat::from_rotation_y(-30.0_f32.to_radians()),
+    );
+
+    canvas.render_scene(&scene, &camera)?;
 
     Ok(())
 }

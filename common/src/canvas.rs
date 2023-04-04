@@ -4,7 +4,7 @@ use glam::{IVec3, Vec3};
 use sdl2::{pixels::Color, render::Canvas as SDLCanvas, video::Window};
 
 use crate::math::*;
-use crate::{Instance, Scene, Triangle};
+use crate::{Camera, Instance, Model, Scene, Transform, Triangle};
 
 pub struct Canvas {
     half_width: i32,
@@ -284,21 +284,25 @@ impl Canvas {
         Ok(())
     }
 
-    pub fn render_scene(&self, scene: &Scene) -> anyhow::Result<()> {
-        for i in scene.get_instances() {
-            self.render_instance(i)?;
+    // TODO: move to Scene
+    // TODO: should the camera be a member of the scene?
+    pub fn render_scene(&self, scene: &Scene, camera: &Camera) -> anyhow::Result<()> {
+        let m_camera = camera.get_matrix();
+
+        for instance in scene.get_instances() {
+            let m = m_camera * instance.get_transform();
+            self.render_model(instance.get_model(), &m)?;
         }
 
         Ok(())
     }
 
-    fn render_instance(&self, instance: &Instance) -> anyhow::Result<()> {
-        let model = instance.get_model();
-
+    // TODO: move to Model
+    fn render_model(&self, model: &Model, transform: &Transform) -> anyhow::Result<()> {
         let mut projected = Vec::with_capacity(model.get_vertices().len());
         for v in model.get_vertices() {
-            let v = instance.get_transform().apply(*v);
-            projected.push(self.project(v));
+            let v = transform * v.extend(1.0);
+            projected.push(self.project(v.truncate()));
         }
 
         for t in model.get_triangles() {
@@ -308,6 +312,25 @@ impl Canvas {
         Ok(())
     }
 
+    // TODO: move to Instance
+    #[allow(dead_code)]
+    fn render_instance(&self, instance: &Instance) -> anyhow::Result<()> {
+        let model = instance.get_model();
+
+        let mut projected = Vec::with_capacity(model.get_vertices().len());
+        for v in model.get_vertices() {
+            let v = instance.get_transform() * v.extend(1.0);
+            projected.push(self.project(v.truncate()));
+        }
+
+        for t in model.get_triangles() {
+            self.render_triangle(*t, &projected)?;
+        }
+
+        Ok(())
+    }
+
+    // TODO: move to Triangle
     fn render_triangle(
         &self,
         triangle: Triangle,
