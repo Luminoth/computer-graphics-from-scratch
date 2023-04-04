@@ -1,6 +1,8 @@
 use glam::{DVec3, Vec3};
 use sdl2::pixels::Color;
 
+use crate::Canvas;
+
 #[derive(Debug, Copy, Clone)]
 pub struct Material {
     color: Color,
@@ -179,5 +181,19 @@ impl Triangle {
     #[inline]
     pub fn get_material(&self) -> Material {
         self.material
+    }
+
+    // projected should be the triangle vertices in viewport space
+    pub fn render(&self, canvas: &Canvas, projected: impl AsRef<[Vec3]>) -> anyhow::Result<()> {
+        let projected = projected.as_ref();
+
+        canvas.draw_wireframe_triangle(
+            projected[self.vertices[0]],
+            projected[self.vertices[1]],
+            projected[self.vertices[2]],
+            self.material.get_color(),
+        )?;
+
+        Ok(())
     }
 }

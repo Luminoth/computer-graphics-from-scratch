@@ -1,7 +1,7 @@
 use glam::{Mat4, Quat, Vec3, Vec4};
 use sdl2::pixels::Color;
 
-use crate::{Material, Triangle};
+use crate::{Canvas, Material, Triangle};
 
 #[derive(Debug, Clone)]
 pub struct Transform {
@@ -184,6 +184,24 @@ impl Model {
             Self::Cube(cube) => cube.get_triangles(),
         }
     }
+
+    // transform should be in camera space
+    pub fn render(&self, canvas: &Canvas, transform: &Transform) -> anyhow::Result<()> {
+        let mut projected = Vec::with_capacity(self.get_vertices().len());
+        for v in self.get_vertices() {
+            // model space to camera space
+            let v = transform * v.extend(1.0);
+
+            // camera space to viewport
+            projected.push(canvas.project(&v.truncate()));
+        }
+
+        for t in self.get_triangles() {
+            t.render(canvas, &projected)?;
+        }
+
+        Ok(())
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -208,5 +226,24 @@ impl Instance {
     #[inline]
     pub fn get_transform(&self) -> &Transform {
         &self.transform
+    }
+
+    pub fn render(&self, canvas: &Canvas) -> anyhow::Result<()> {
+        let model = self.get_model();
+
+        let mut projected = Vec::with_capacity(model.get_vertices().len());
+        for v in model.get_vertices() {
+            // model space to world space
+            let v = self.get_transform() * v.extend(1.0);
+
+            // world space to viewport
+            projected.push(canvas.project(&v.truncate()));
+        }
+
+        for t in model.get_triangles() {
+            t.render(canvas, &projected)?;
+        }
+
+        Ok(())
     }
 }

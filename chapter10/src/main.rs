@@ -4,7 +4,6 @@ use common::*;
 
 const WINDOW_TITLE: &str = "Chapter 10";
 
-#[allow(non_snake_case)]
 fn render(canvas: &Canvas) -> anyhow::Result<()> {
     let mut scene = Scene::default();
     scene.add_instance(Instance::new_cube(Transform::new(
@@ -23,7 +22,7 @@ fn render(canvas: &Canvas) -> anyhow::Result<()> {
         Quat::from_rotation_y(-30.0_f32.to_radians()),
     );
 
-    canvas.render_scene(&scene, &camera)?;
+    scene.render(canvas, &camera)?;
 
     Ok(())
 }

@@ -4,7 +4,7 @@ use glam::{IVec3, Vec3};
 use sdl2::{pixels::Color, render::Canvas as SDLCanvas, video::Window};
 
 use crate::math::*;
-use crate::{Camera, Instance, Model, Scene, Transform, Triangle};
+use crate::Triangle;
 
 pub struct Canvas {
     half_width: i32,
@@ -52,6 +52,7 @@ impl Canvas {
         self.half_height
     }
 
+    #[inline]
     pub fn to_viewport(&self, x: i32, y: i32) -> Vec3 {
         Vec3::new(
             x as f32 * self.width_ratio,
@@ -60,6 +61,7 @@ impl Canvas {
         )
     }
 
+    #[inline]
     pub fn from_viewport(&self, x: f32, y: f32) -> Vec3 {
         Vec3::new(
             x * self.inv_width_ratio,
@@ -68,7 +70,8 @@ impl Canvas {
         )
     }
 
-    pub fn project(&self, v: Vec3) -> Vec3 {
+    #[inline]
+    pub fn project(&self, v: &Vec3) -> Vec3 {
         self.from_viewport(
             v.x * self.viewport_distance / v.z,
             v.y * self.viewport_distance / v.z,
@@ -274,76 +277,13 @@ impl Canvas {
     ) -> anyhow::Result<()> {
         let mut projected = Vec::with_capacity(vertices.as_ref().len());
         for v in vertices.as_ref() {
-            projected.push(self.project(*v));
+            // world space to viewport space
+            projected.push(self.project(v));
         }
 
         for t in triangles.as_ref() {
-            self.render_triangle(*t, &projected)?;
+            t.render(self, &projected)?;
         }
-
-        Ok(())
-    }
-
-    // TODO: move to Scene
-    // TODO: should the camera be a member of the scene?
-    pub fn render_scene(&self, scene: &Scene, camera: &Camera) -> anyhow::Result<()> {
-        let m_camera = camera.get_matrix();
-
-        for instance in scene.get_instances() {
-            let m = m_camera * instance.get_transform();
-            self.render_model(instance.get_model(), &m)?;
-        }
-
-        Ok(())
-    }
-
-    // TODO: move to Model
-    fn render_model(&self, model: &Model, transform: &Transform) -> anyhow::Result<()> {
-        let mut projected = Vec::with_capacity(model.get_vertices().len());
-        for v in model.get_vertices() {
-            let v = transform * v.extend(1.0);
-            projected.push(self.project(v.truncate()));
-        }
-
-        for t in model.get_triangles() {
-            self.render_triangle(*t, &projected)?;
-        }
-
-        Ok(())
-    }
-
-    // TODO: move to Instance
-    #[allow(dead_code)]
-    fn render_instance(&self, instance: &Instance) -> anyhow::Result<()> {
-        let model = instance.get_model();
-
-        let mut projected = Vec::with_capacity(model.get_vertices().len());
-        for v in model.get_vertices() {
-            let v = instance.get_transform() * v.extend(1.0);
-            projected.push(self.project(v.truncate()));
-        }
-
-        for t in model.get_triangles() {
-            self.render_triangle(*t, &projected)?;
-        }
-
-        Ok(())
-    }
-
-    // TODO: move to Triangle
-    fn render_triangle(
-        &self,
-        triangle: Triangle,
-        projected: impl AsRef<[Vec3]>,
-    ) -> anyhow::Result<()> {
-        let projected = projected.as_ref();
-
-        self.draw_wireframe_triangle(
-            projected[triangle.get_vertices()[0]],
-            projected[triangle.get_vertices()[1]],
-            projected[triangle.get_vertices()[2]],
-            triangle.get_material().get_color(),
-        )?;
 
         Ok(())
     }
