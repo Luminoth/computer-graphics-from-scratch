@@ -18,7 +18,7 @@ fn render(canvas: &Canvas) -> anyhow::Result<()> {
     )));
 
     let camera = Camera::new(
-        Vec3::new(-3.0, 1.0, 2.0),
+        Vec3::new(-3.0, 1.0, -2.0),
         Quat::from_rotation_y(-30.0_f32.to_radians()),
     );
 
