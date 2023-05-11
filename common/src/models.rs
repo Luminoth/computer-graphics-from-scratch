@@ -1,7 +1,7 @@
 use glam::{Mat4, Quat, Vec3, Vec4};
 use sdl2::pixels::Color;
 
-use crate::{Canvas, Material, Triangle};
+use crate::{Canvas, Material, Plane, Triangle};
 
 #[derive(Debug, Clone)]
 pub struct Transform {
@@ -226,6 +226,21 @@ impl Instance {
     #[inline]
     pub fn get_transform(&self) -> &Transform {
         &self.transform
+    }
+
+    fn clip_against_plane(&self, _plane: &Plane) -> Option<Self> {
+        //let d = plane.signed_distance(self.get_bounding_sphere().get_center());
+
+        None
+    }
+
+    pub fn clip(&self, planes: impl AsRef<[Plane]>) -> Option<Self> {
+        let mut instance = Some(self.clone());
+        for p in planes.as_ref() {
+            instance = instance.unwrap().clip_against_plane(p);
+            instance.as_ref()?;
+        }
+        instance
     }
 
     pub fn render(&self, canvas: &Canvas) -> anyhow::Result<()> {

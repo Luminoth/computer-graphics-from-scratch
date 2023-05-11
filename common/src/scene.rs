@@ -1,4 +1,4 @@
-use crate::{Camera, Canvas, Instance};
+use crate::{Camera, Canvas, Instance, Plane};
 
 #[derive(Debug, Default)]
 pub struct Scene {
@@ -13,6 +13,19 @@ impl Scene {
 
     pub fn add_instance(&mut self, instance: Instance) {
         self.instances.push(instance);
+    }
+
+    pub fn clip(&self, planes: impl AsRef<[Plane]>) -> Self {
+        let mut clipped_instances = Vec::with_capacity(self.instances.len());
+        for i in &self.instances {
+            if let Some(clipped_instance) = i.clip(&planes) {
+                clipped_instances.push(clipped_instance);
+            }
+        }
+
+        Self {
+            instances: clipped_instances,
+        }
     }
 
     // TODO: should the camera be a member of the scene?

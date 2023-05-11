@@ -27,3 +27,26 @@ pub fn interpolate(i0: i32, d0: f32, i1: i32, d1: f32) -> Vec<f32> {
 
     values
 }
+
+#[derive(Debug, Copy, Clone)]
+pub struct Plane {
+    normal: Vec3,
+    distance: f32,
+}
+
+impl Plane {
+    #[inline]
+    pub fn get_normal(&self) -> Vec3 {
+        self.normal
+    }
+
+    #[inline]
+    pub fn get_distance(&self) -> f32 {
+        self.distance
+    }
+
+    #[inline]
+    pub fn signed_distance(&self, v: &Vec3) -> f32 {
+        (v.x * self.normal.x) + (v.y * self.normal.y) + (v.z * self.normal.z) + self.distance
+    }
+}

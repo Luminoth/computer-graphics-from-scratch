@@ -5,7 +5,17 @@ use common::*;
 const WINDOW_TITLE: &str = "Chapter 11";
 
 fn render(canvas: &Canvas) -> anyhow::Result<()> {
-    let scene = Scene::default();
+    let mut scene = Scene::default();
+    scene.add_instance(Instance::new_cube(Transform::new(
+        Vec3::new(-1.5, 0.0, 7.0),
+        Quat::default(),
+        0.75,
+    )));
+    scene.add_instance(Instance::new_cube(Transform::new(
+        Vec3::new(1.25, 2.5, 7.5),
+        Quat::from_rotation_y(195.0_f32.to_radians()),
+        1.0,
+    )));
 
     let camera = Camera::new(
         Vec3::new(-3.0, 1.0, -2.0),
